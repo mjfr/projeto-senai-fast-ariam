@@ -6,7 +6,7 @@ API desenvolvida em FastAPI para o sistema de gerenciamento de Ordens de Serviç
 
 1.  **Clone o repositório:**
     ```bash
-    git clone [https://github.com/mjfr/projeto-senai-fast-ariam.git](https://github.com/mjfr/projeto-senai-fast-ariam.git)
+    git clone https://github.com/mjfr/projeto-senai-fast-ariam.git
     cd projeto-senai-fast-ariam
     ```
 
