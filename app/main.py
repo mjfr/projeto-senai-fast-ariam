@@ -2,6 +2,9 @@ import uvicorn
 from fastapi import FastAPI
 from app.api.router import api_router
 
+# TODO: Lembrar de documentar melhor as classes, métodos e utilizar as docstrings para melhorar as descrições no Swagger
+# TODO: A visita é a parte mais complicada até o momento do desenvolvimento, logo, ela recebe um cuidado maior nas documentações, depois, fazer o mesmo para todo o resto.
+
 app = FastAPI(
     title="Fast Ariam API",
     description="API para o sistema de gerenciamento de Ordens de Serviço da Fast Ariam.",
