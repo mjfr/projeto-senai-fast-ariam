@@ -1,0 +1,444 @@
+{
+	"info": {
+		"_postman_id": "e44f79c7-e504-463d-b69c-dcd2ba040547",
+		"name": "fast_ariam_backend",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "48474007",
+		"_collection_link": "https://pwumat-6509979.postman.co/workspace/Matheus-Jos%C3%A9's-Workspace~dfc914c4-ecf1-4044-8602-9e8a9dc6c9f4/collection/48474007-e44f79c7-e504-463d-b69c-dcd2ba040547?action=share&source=collection_link&creator=48474007"
+	},
+	"item": [
+		{
+			"name": "Tecnico",
+			"item": [
+				{
+					"name": "Novo Técnico",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"cnpj\": \"12.345.678/0001-99\",\r\n  \"inscricao_estadual\": \"123.456.789.112\",\r\n  \"nome\": \"Paulo Cesar de Souza Refrigeração\",\r\n  \"telefone\": \"27996687821\",\r\n  \"email\": \"eletropaulorefrigeracao@gmail.com\",\r\n  \"password\": \"senhaSuperSecreta123\",\r\n  \"dados_bancarios\": {\r\n    \"banco\": \"Banco do Brasil\",\r\n    \"agencia\": \"1234-5\",\r\n    \"conta\": \"54321-0\",\r\n    \"pix\": \"12345678000199\"\r\n  }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}:{{port}}/api/tecnicos",
+							"host": [
+								"{{base_url}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"tecnicos"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Técnico por ID",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"cnpj\": \"12.345.678/0001-99\",\r\n  \"inscricao_estadual\": \"123.456.789.112\",\r\n  \"nome\": \"Paulo Cesar de Souza Refrigeração\",\r\n  \"telefone\": \"27996687821\",\r\n  \"email\": \"eletropaulorefrigeracao@gmail.com\",\r\n  \"password\": \"senhaSuperSecreta123\",\r\n  \"dados_bancarios\": {\r\n    \"banco\": \"Banco do Brasil\",\r\n    \"agencia\": \"1234-5\",\r\n    \"conta\": \"54321-0\",\r\n    \"pix\": \"12345678000199\"\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}:{{port}}/api/tecnicos/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"tecnicos",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Todos Técnicos",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"cnpj\": \"12.345.678/0001-99\",\r\n  \"inscricao_estadual\": \"123.456.789.112\",\r\n  \"nome\": \"Paulo Cesar de Souza Refrigeração\",\r\n  \"telefone\": \"27996687821\",\r\n  \"email\": \"eletropaulorefrigeracao@gmail.com\",\r\n  \"password\": \"senhaSuperSecreta123\",\r\n  \"dados_bancarios\": {\r\n    \"banco\": \"Banco do Brasil\",\r\n    \"agencia\": \"1234-5\",\r\n    \"conta\": \"54321-0\",\r\n    \"pix\": \"12345678000199\"\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}:{{port}}/api/tecnicos",
+							"host": [
+								"{{base_url}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"tecnicos"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Todos Técnicos Com Filtro",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"cnpj\": \"12.345.678/0001-99\",\r\n  \"inscricao_estadual\": \"123.456.789.112\",\r\n  \"nome\": \"Paulo Cesar de Souza Refrigeração\",\r\n  \"telefone\": \"27996687821\",\r\n  \"email\": \"eletropaulorefrigeracao@gmail.com\",\r\n  \"password\": \"senhaSuperSecreta123\",\r\n  \"dados_bancarios\": {\r\n    \"banco\": \"Banco do Brasil\",\r\n    \"agencia\": \"1234-5\",\r\n    \"conta\": \"54321-0\",\r\n    \"pix\": \"12345678000199\"\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}:{{port}}/api/tecnicos?is_active=false",
+							"host": [
+								"{{base_url}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"tecnicos"
+							],
+							"query": [
+								{
+									"key": "is_active",
+									"value": "false"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Tecnico",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nome\": \"Luna Blanca\"\r\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}:{{port}}/api/tecnicos/2",
+							"host": [
+								"{{base_url}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"tecnicos",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deletar Técnicno (soft delete)",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}:{{port}}/api/tecnicos/3",
+							"host": [
+								"{{base_url}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"tecnicos",
+								"3"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Chamado",
+			"item": [
+				{
+					"name": "Novo Chamado",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"cliente\": {\r\n        \"razao_social\": \"Auto Serviço Peixodo LTDA\",\r\n        \"contato_principal\": {\r\n            \"nome\": \"Karina\",\r\n            \"telefone\": \"(27) 9 9643-9718\"\r\n        },\r\n        \"telefone\": \"(27) 3251-1264\",\r\n        \"endereco\": \"Praça João Miguel\",\r\n        \"numero\": \"132\",\r\n        \"bairro\": \"Serra Centro\",\r\n        \"cidade\": \"Serra\",\r\n        \"uf\": \"ES\",\r\n        \"codigo\": \"55835\",\r\n        \"pedido\": \"5314024-1\",\r\n        \"data_faturamento\": \"2025-03-07\",\r\n        \"em_garantia\": true\r\n    },\r\n    \"descricao_cliente\": \"Equipamento está formando gelo em excesso na parte interna.\",\r\n    \"numero_serie_equipamento\": \"1411224002524-F01\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}:{{port}}/api/chamados",
+							"host": [
+								"{{base_url}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"chamados"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Todos Chamados",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"cnpj\": \"12.345.678/0001-99\",\r\n  \"inscricao_estadual\": \"123.456.789.112\",\r\n  \"nome\": \"Paulo Cesar de Souza Refrigeração\",\r\n  \"telefone\": \"27996687821\",\r\n  \"email\": \"eletropaulorefrigeracao@gmail.com\",\r\n  \"password\": \"senhaSuperSecreta123\",\r\n  \"dados_bancarios\": {\r\n    \"banco\": \"Banco do Brasil\",\r\n    \"agencia\": \"1234-5\",\r\n    \"conta\": \"54321-0\",\r\n    \"pix\": \"12345678000199\"\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}:{{port}}/api/chamados",
+							"host": [
+								"{{base_url}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"chamados"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Chamada por ID",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"cliente\": {\r\n        \"razao_social\": \"Auto Serviço Peixodo LTDA\",\r\n        \"contato_principal\": {\r\n            \"nome\": \"Karina\",\r\n            \"telefone\": \"(27) 9 9643-9718\"\r\n        },\r\n        \"telefone\": \"(27) 3251-1264\",\r\n        \"endereco\": \"Praça João Miguel\",\r\n        \"numero\": \"132\",\r\n        \"bairro\": \"Serra Centro\",\r\n        \"cidade\": \"Serra\",\r\n        \"uf\": \"ES\",\r\n        \"codigo\": \"55835\",\r\n        \"pedido\": \"5314024-1\",\r\n        \"data_faturamento\": \"2025-03-07\",\r\n        \"em_garantia\": true\r\n    },\r\n    \"descricao_cliente\": \"Equipamento está formando gelo em excesso na parte interna.\",\r\n    \"numero_serie_equipamento\": \"1411224002524-F01\"\r\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}:{{port}}/api/chamados/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"chamados",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Chamado",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"cliente\": {\r\n        \"razao_social\": \"Auto Serviço Peixoto LTDA\"\r\n    },\r\n    \"is_cancelled\": false\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}:{{port}}/api/chamados/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"chamados",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deletar Chamado (soft delete)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"cliente\": {\r\n        \"razao_social\": \"Auto Serviço Peixodo LTDA\"\r\n    }\r\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}:{{port}}/api/chamados/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"chamados",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Adicionar Visita",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"data_visita\": \"2025-10-21\",\r\n    \"hora_inicio_deslocamento\": \"18:30\",\r\n    \"hora_chegada_cliente\": \"19:12\",\r\n    \"hora_inicio_atendimento\": \"19:20\",\r\n    \"hora_fim_atendimento\": \"21:30\",\r\n    \"km_total\": 17,\r\n    \"valor_pedagio\": 0,\r\n    \"valor_frete_devolucao\": 0,\r\n    \"descricao_servico_executado\": \"Solda no tubo de gás da ilha vertical\",\r\n    \"materiais_utilizados\": [\r\n        {\r\n            \"nome\": \"Solda Prata\",\r\n            \"quantidade\": 1,\r\n            \"valor\": 15.50\r\n        },\r\n        {\r\n            \"nome\": \"Tubo de Cobre 1/4\",\r\n            \"quantidade\": 1,\r\n            \"valor\": 25.00\r\n        }\r\n    ],\r\n    \"servico_finalizado\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}:{{port}}/api/chamados/1/visitas",
+							"host": [
+								"{{base_url}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"chamados",
+								"1",
+								"visitas"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Calcular Custos do Chamado",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"cliente\": {\r\n        \"razao_social\": \"Auto Serviço Peixodo LTDA\"\r\n    }\r\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}:{{port}}/api/chamados/1/custos",
+							"host": [
+								"{{base_url}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"chamados",
+								"1",
+								"custos"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Check Health",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}:{{port}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"port": "{{port}}"
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": ""
+		},
+		{
+			"key": "port",
+			"value": "",
+			"type": "default"
+		}
+	]
+}
