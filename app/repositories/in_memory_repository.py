@@ -40,7 +40,7 @@ class InMemoryRepository:
                 for row in reader:
                     row['id'] = int(row['id'])
 
-                    json_fields = ['dados_bancarios', 'cliente', 'visitas', 'materiais_utilizados']
+                    json_fields = ['dados_bancarios', 'cliente', 'visitas', 'materiais_utilizados', "contato_principal"]
                     for field in json_fields:
                         if field in row and row[field]:
                             try:

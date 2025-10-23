@@ -18,21 +18,18 @@ class ClienteInfo(BaseModel):
     bairro: str
     cidade: str
     uf: str
-    codigo: str
+    codigo: int
     pedido: Optional[str] = None
     data_faturamento: Optional[date] = None
     em_garantia: bool = True
-
-class Custos(BaseModel):
-    custo_deslocamento_rs: float = 0.0
-    custo_hora_trabalhada_rs: float = 0.0
-    custo_km_rs: float = 0.0
-    custo_materiais_rs: float = 0.0
 
 class ChamadoBase(BaseModel):
     cliente: ClienteInfo
     descricao_cliente: str
     numero_serie_equipamento: Optional[str] = None
+    pedido: Optional[str] = None
+    data_faturamento: Optional[date] = None
+    em_garantia: bool = True
 
 class ChamadoCreate(ChamadoBase):
     pass
@@ -42,7 +39,7 @@ class Chamado(ChamadoBase):
     data_abertura: date
     status: str
     id_tecnico_atribuido: Optional[int] = None
-    visitas: List[Visita] = []
+    visitas: List[Visita] = List[dict]
     is_cancelled: bool = False
 
     class Config:
@@ -73,4 +70,4 @@ class ChamadoUpdate(BaseModel):
     numero_serie_equipamento: Optional[str] = None
     id_tecnico_atribuido: Optional[int] = None
     status: Optional[str] = None
-    is_cancelled: Optional[bool] = False
+    is_cancelled: Optional[bool] = None
