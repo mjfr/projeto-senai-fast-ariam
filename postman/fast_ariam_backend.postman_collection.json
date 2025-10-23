@@ -8,7 +8,7 @@
 	},
 	"item": [
 		{
-			"name": "Tecnico",
+			"name": "Tecnicos",
 			"item": [
 				{
 					"name": "Novo Técnico",
@@ -176,7 +176,7 @@
 			]
 		},
 		{
-			"name": "Chamado",
+			"name": "Chamados",
 			"item": [
 				{
 					"name": "Novo Chamado",
@@ -383,6 +383,157 @@
 								"chamados",
 								"1",
 								"custos"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Clientes",
+			"item": [
+				{
+					"name": "Novo Cliente",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"razao_social\": \"AUTO SERVICO PEIXOTO LTDA\",\r\n  \"contato_principal\": {\r\n    \"nome\": \"Karina Silva\",\r\n    \"telefone\": \"27996439718\"\r\n  },\r\n  \"telefone\": \"2732511264\",\r\n  \"endereco\": \"PRACA JOAO MIGUEL\",\r\n  \"numero\": \"132\",\r\n  \"bairro\": \"SERRA CENTRO\",\r\n  \"cidade\": \"SERRA\",\r\n  \"uf\": \"ES\",\r\n  \"codigo\": 55835,\r\n  \"is_active\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}:{{port}}/api/clientes",
+							"host": [
+								"{{base_url}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"clientes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Todos Clientes",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"cnpj\": \"12.345.678/0001-99\",\r\n  \"inscricao_estadual\": \"123.456.789.112\",\r\n  \"nome\": \"Paulo Cesar de Souza Refrigeração\",\r\n  \"telefone\": \"27996687821\",\r\n  \"email\": \"eletropaulorefrigeracao@gmail.com\",\r\n  \"password\": \"senhaSuperSecreta123\",\r\n  \"dados_bancarios\": {\r\n    \"banco\": \"Banco do Brasil\",\r\n    \"agencia\": \"1234-5\",\r\n    \"conta\": \"54321-0\",\r\n    \"pix\": \"12345678000199\"\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}:{{port}}/api/clientes",
+							"host": [
+								"{{base_url}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"clientes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Cliente por ID",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"cliente\": {\r\n        \"razao_social\": \"Auto Serviço Peixodo LTDA\",\r\n        \"contato_principal\": {\r\n            \"nome\": \"Karina\",\r\n            \"telefone\": \"(27) 9 9643-9718\"\r\n        },\r\n        \"telefone\": \"(27) 3251-1264\",\r\n        \"endereco\": \"Praça João Miguel\",\r\n        \"numero\": \"132\",\r\n        \"bairro\": \"Serra Centro\",\r\n        \"cidade\": \"Serra\",\r\n        \"uf\": \"ES\",\r\n        \"codigo\": \"55835\",\r\n        \"pedido\": \"5314024-1\",\r\n        \"data_faturamento\": \"2025-03-07\",\r\n        \"em_garantia\": true\r\n    },\r\n    \"descricao_cliente\": \"Equipamento está formando gelo em excesso na parte interna.\",\r\n    \"numero_serie_equipamento\": \"1411224002524-F01\"\r\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}:{{port}}/api/clientes/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"clientes",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Cliente",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"contato_principal\": {\r\n        \"nome\": \"Karina Silva - WhatsApp\"\r\n    }, \r\n    \"codigo\": 12345\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}:{{port}}/api/clientes/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"clientes",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deletar Cliente (soft delete)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"cliente\": {\r\n        \"razao_social\": \"Auto Serviço Peixodo LTDA\"\r\n    }\r\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}:{{port}}/api/chamados/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"chamados",
+								"1"
 							]
 						}
 					},
