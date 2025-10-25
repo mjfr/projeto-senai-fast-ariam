@@ -1,20 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, Response, Query
 from typing import List, Optional
-from pydantic import BaseModel, EmailStr
-from app.schemas.tecnico import Tecnico, TecnicoCreate, DadosBancarios
+from app.schemas.tecnico import Tecnico, TecnicoCreate, DadosBancarios, TecnicoUpdate, DadosBancariosUpdate
 from app.repositories.in_memory_repository import InMemoryRepository
 from app.core.security import hash_password
-
-
-class TecnicoUpdate(BaseModel):
-    cnpj: Optional[str] = None
-    inscricao_estadual: Optional[str] = None
-    nome: Optional[str] = None
-    telefone: Optional[str] = None
-    email: Optional[EmailStr] = None
-    dados_bancarios: Optional[DadosBancarios] = None
-    is_active: Optional[bool] = None
-
 
 router = APIRouter()
 

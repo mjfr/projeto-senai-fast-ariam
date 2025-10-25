@@ -1,13 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from typing import List, Optional
 from datetime import date
-from app.schemas.chamado import Chamado, ChamadoCreate, ChamadoUpdate
+from app.api.endpoints.clientes import get_cliente_repository
+from app.core.security import get_current_active_user
 from app.repositories.in_memory_repository import InMemoryRepository
+from app.schemas.chamado import Chamado, ChamadoCreate, ChamadoUpdate
 from app.schemas.visita import Visita, VisitaCreate
 from app.schemas.custo import CustoTotalResponse
 from app.schemas.cliente import Cliente
 from app.services.custo_service import CustoService
-from app.api.endpoints.clientes import get_cliente_repository
 
 router = APIRouter()
 
@@ -43,13 +44,20 @@ def create_chamado(
 def get_todos_chamados(
         repo: InMemoryRepository = Depends(get_chamado_repository),
         cliente_repo: InMemoryRepository = Depends(get_cliente_repository),
-        is_cancelled: Optional[bool] = Query(None, description="Filtra chamados pelo status de cancelamento")
+        is_cancelled: Optional[bool] = Query(None, description="Filtra chamados pelo status de cancelamento"),
+        current_user: dict = Depends(get_current_active_user)
 ):
     chamados_list = repo.get_all()
     response_list = []
-    for chamado_db in chamados_list:
+    logged_user_id = current_user["user_id"]
 
+    for chamado_db in chamados_list:
         is_chamado_cancelado = chamado_db.get("is_cancelled", False)
+        id_tecnico_atribuido = chamado_db.get("id_tecnico_atribuido")
+
+        if id_tecnico_atribuido != logged_user_id:
+            continue
+
         if is_cancelled is not None and is_chamado_cancelado != is_cancelled:
             continue
 
@@ -78,7 +86,8 @@ def get_chamado_por_id(
 
     cliente_db = cliente_repo.get_by_id(cliente_id_chamado)
     if not cliente_db:  # TODO: Verificar inconsistência. Se não houver cliente, talvez colocar um None ou um placeholder
-        raise HTTPException(status_code=500, detail=f"Inconsistência de dados: Cliente com ID {cliente_id_chamado} associado ao chamado não foi encontrado.")
+        raise HTTPException(status_code=500,
+                            detail=f"Inconsistência de dados: Cliente com ID {cliente_id_chamado} associado ao chamado não foi encontrado.")
 
     chamado_completo = chamado_encontrado.copy()
     chamado_completo['cliente'] = Cliente(**cliente_db)
@@ -111,7 +120,8 @@ def update_chamado(
 
     resposta_completa = updated_chamado.copy()
     if cliente_final_db:
-        resposta_completa['cliente'] = Cliente(**cliente_final_db)  # TODO: Por enquanto, fica sem cliente se não for encontrado
+        resposta_completa['cliente'] = Cliente(
+            **cliente_final_db)  # TODO: Por enquanto, fica sem cliente se não for encontrado
     return Chamado(**resposta_completa)
 
 
@@ -131,11 +141,21 @@ def delete_chamado(
 def add_visita_ao_chamado(
         chamado_id: int,
         visita_in: VisitaCreate,
-        repo: InMemoryRepository = Depends(get_chamado_repository)
+        repo: InMemoryRepository = Depends(get_chamado_repository),
+        current_user: dict = Depends(get_current_active_user)
 ):
+    """
+    Adiciona uma nova visita ao chamado.
+    Requer que o usuário esteja autenticado com um token JWT válido
+    """
+    logged_user_id = current_user["user_id"]
+
     chamado = repo.get_by_id(chamado_id)
     if not chamado or chamado.get('is_cancelled', False):
         raise HTTPException(status_code=404, detail="Chamado não encontrado")
+
+    if chamado.get('id_tecnico_atribuido') != logged_user_id:
+        raise HTTPException(status_code=403, detail="Você não tem permissão para adicionar uma visita neste chamado.")
 
     visita_data = visita_in.dict()
 
