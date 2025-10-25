@@ -38,9 +38,20 @@ class InMemoryRepository:
                 reader = csv.DictReader(file)
                 data = []
                 for row in reader:
-                    row['id'] = int(row['id'])
 
-                    json_fields = ['dados_bancarios', 'cliente', 'visitas', 'materiais_utilizados', "contato_principal"]
+                    int_fields = ['id', 'cliente_id', 'id_tecnico_atribuido', 'codigo'] # Resolve os problemas de ints tratadas como strings
+                    for field in int_fields:
+                        if field in row:
+                            value = row[field]
+                            if value == '':
+                                row[field] = None
+                            else:
+                                try:
+                                    row[field] = int(row[field])
+                                except (ValueError, TypeError):
+                                    row[field] = None
+
+                    json_fields = ['dados_bancarios', 'cliente', 'visitas', 'materiais_utilizados', "contato_principal"] # Resolve os problemas de JSON aninhado que são tratados como strings
                     for field in json_fields:
                         if field in row and row[field]:
                             try:
@@ -48,7 +59,7 @@ class InMemoryRepository:
                             except json.JSONDecodeError:
                                 pass
 
-                    bool_fields = ['is_active', 'is_cancelled', 'em_garantia']
+                    bool_fields = ['is_active', 'is_cancelled', 'em_garantia'] # Resolve os problemas de booleans sendo tratados como strings
                     for field in bool_fields:
                         if field in row:
                             row[field] = row[field] == 'True'

@@ -1,38 +1,22 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from datetime import date
 from typing import Optional, List
 from .visita import Visita
+from .cliente import Cliente
 
-# TODO: Quando tudo estiver funcionando tranquilamente, passar o Cliente para um schema próprio e tratar como um cadastro (evitar repetições e erros futuros)
-
-class ContatoCliente(BaseModel):
-    nome: str
-    telefone: str
-
-class ClienteInfo(BaseModel):
-    razao_social: str
-    contato_principal: ContatoCliente
-    telefone: str
-    endereco: str
-    numero: str
-    bairro: str
-    cidade: str
-    uf: str
-    codigo: int
-    pedido: Optional[str] = None
-    data_faturamento: Optional[date] = None
-    em_garantia: bool = True
 
 class ChamadoBase(BaseModel):
-    cliente: ClienteInfo
+    cliente_id: int = Field(..., gt=0, description="ID do cliente associado ao chamado") # TODO: Lembrar de continuar a validação
     descricao_cliente: str
     numero_serie_equipamento: Optional[str] = None
     pedido: Optional[str] = None
     data_faturamento: Optional[date] = None
     em_garantia: bool = True
 
+
 class ChamadoCreate(ChamadoBase):
     pass
+
 
 class Chamado(ChamadoBase):
     id: int
@@ -41,31 +25,14 @@ class Chamado(ChamadoBase):
     id_tecnico_atribuido: Optional[int] = None
     visitas: List[Visita] = List[dict]
     is_cancelled: bool = False
+    cliente: Cliente
 
     class Config:
         from_attributes = True
 
-class ContatoClienteUpdate(BaseModel):
-    nome: Optional[str] = None
-    telefone: Optional[str] = None
-
-
-class ClienteInfoUpdate(BaseModel):
-    razao_social: Optional[str] = None
-    contato_principal: Optional[ContatoClienteUpdate] = None
-    telefone: Optional[str] = None
-    endereco: Optional[str] = None
-    numero: Optional[str] = None
-    bairro: Optional[str] = None
-    cidade: Optional[str] = None
-    uf: Optional[str] = None
-    codigo: Optional[int] = None
-    pedido: Optional[str] = None
-    data_faturamento: Optional[date] = None
-    em_garantia: Optional[bool] = None
 
 class ChamadoUpdate(BaseModel):
-    cliente: Optional[ClienteInfoUpdate] = None
+    cliente_id: Optional[int] = Field(None, gt=0, description="Novo ID do cliente para reassociar o chamado")
     descricao_cliente: Optional[str] = None
     numero_serie_equipamento: Optional[str] = None
     id_tecnico_atribuido: Optional[int] = None
