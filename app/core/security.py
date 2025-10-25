@@ -59,10 +59,14 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> dict:
         detail="Não foi possível validar as credenciais",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    payload = decode_access_token(token)
-    if payload is None:
+    try:
+        payload = decode_access_token(token)
+        if payload is None:
+            raise credentials_exception
+        return payload
+    except Exception as e:
         raise credentials_exception  # TODO: Fazer a busca para saber se o usuário existe
-    return payload
+    # return payload
 
 
 async def get_current_active_user(current_user: dict = Depends(get_current_user)) -> dict:
@@ -71,3 +75,45 @@ async def get_current_active_user(current_user: dict = Depends(get_current_user)
     """
     # TODO: Buscar usuário no repositório
     return current_user
+
+
+# TODO: MOMENTANEAMENTE SEM USO. Mantendo par ver se será útil. A lambda nos depends de require_admin_role e require_technician_role não é uma coroutine (não faz await), mesmo que as funções sejam async, lambda não é.
+async def require_role(required_role: str, user: dict = Depends(get_current_active_user)) -> dict:
+    """
+    Dependência genérica que verifica se o usuário logado tem o role necessária.
+    """
+    user_role = user.get("role")
+    if user_role != required_role:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Acesso negado: Requer privilégios de '{required_role}'."
+        )
+    return user
+
+
+async def require_admin_role(user: dict = Depends(get_current_active_user)) -> dict:
+    """
+    Dependência que exige que o usuário logado tenha o role 'admin'.
+    Obtém o usuário ativo e verifica seu role.
+    """
+    user_role = user.get("role")
+    if user_role != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Acesso negado: Requer privilégios de 'admin'."
+        )
+    return user
+
+
+async def require_technician_role(user: dict = Depends(get_current_active_user)) -> dict:
+    """
+    Dependência que exige que o usuário logado tenha o role 'tecnico'.
+    Obtém o usuário ativo e verifica seu role.
+    """
+    user_role = user.get("role")
+    if user_role != "tecnico":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Acesso negado: Requer privilégios de 'tecnico'."
+        )
+    return user

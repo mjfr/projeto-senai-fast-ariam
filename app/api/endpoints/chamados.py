@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from typing import List, Optional
 from datetime import date
 from app.api.endpoints.clientes import get_cliente_repository
-from app.core.security import get_current_active_user
+from app.core.security import get_current_active_user, require_admin_role, require_technician_role
 from app.repositories.in_memory_repository import InMemoryRepository
 from app.schemas.chamado import Chamado, ChamadoCreate, ChamadoUpdate
 from app.schemas.visita import Visita, VisitaCreate
@@ -22,7 +22,8 @@ def get_chamado_repository():
 def create_chamado(
         chamado_in: ChamadoCreate,
         repo: InMemoryRepository = Depends(get_chamado_repository),
-        cliente_repo: InMemoryRepository = Depends(get_cliente_repository)
+        cliente_repo: InMemoryRepository = Depends(get_cliente_repository),
+        admin_user: dict = Depends(require_admin_role)
 ):
     cliente_db = cliente_repo.get_by_id(chamado_in.cliente_id)
     if not cliente_db or not cliente_db.get("is_active", True):
@@ -49,17 +50,19 @@ def get_todos_chamados(
 ):
     chamados_list = repo.get_all()
     response_list = []
-    logged_user_id = current_user["user_id"]
+    user_id = current_user.get("user_id")
+    user_role = current_user.get("role")
 
     for chamado_db in chamados_list:
         is_chamado_cancelado = chamado_db.get("is_cancelled", False)
         id_tecnico_atribuido = chamado_db.get("id_tecnico_atribuido")
 
-        if id_tecnico_atribuido != logged_user_id:
-            continue
-
         if is_cancelled is not None and is_chamado_cancelado != is_cancelled:
             continue
+
+        if user_role == "tecnico":
+            if id_tecnico_atribuido != user_id:
+                continue
 
         cliente_db = cliente_repo.get_by_id(chamado_db.get('cliente_id'))
         if cliente_db:
@@ -74,11 +77,19 @@ def get_todos_chamados(
 def get_chamado_por_id(
         chamado_id: int,
         repo: InMemoryRepository = Depends(get_chamado_repository),
-        cliente_repo: InMemoryRepository = Depends(get_cliente_repository)
+        cliente_repo: InMemoryRepository = Depends(get_cliente_repository),
+        current_user: dict = Depends(get_current_active_user)
 ):
     chamado_encontrado = repo.get_by_id(chamado_id)
     if not chamado_encontrado:
         raise HTTPException(status_code=404, detail="Chamado não encontrado ou cancelado.")
+
+    user_id = current_user.get("user_id")
+    user_role = current_user.get("role")
+    id_tecnico_atribuido = chamado_encontrado.get("id_tecnico_atribuido")
+
+    if user_role == "tecnico" and id_tecnico_atribuido != user_id:
+        raise HTTPException(status_code=403, detail="Acesso negado a este chamado.")
 
     cliente_id_chamado = chamado_encontrado.get('cliente_id')
     if cliente_id_chamado is None:
@@ -99,7 +110,8 @@ def update_chamado(
         chamado_id: int,
         chamado_in: ChamadoUpdate,
         repo: InMemoryRepository = Depends(get_chamado_repository),
-        cliente_repo: InMemoryRepository = Depends(get_cliente_repository)
+        cliente_repo: InMemoryRepository = Depends(get_cliente_repository),
+        admin_user: dict = Depends(require_admin_role)
 ):
     update_data = chamado_in.dict(exclude_unset=True)
     if not update_data:
@@ -128,7 +140,8 @@ def update_chamado(
 @router.delete("/{chamado_id}", status_code=204)
 def delete_chamado(
         chamado_id: int,
-        repo: InMemoryRepository = Depends(get_chamado_repository)
+        repo: InMemoryRepository = Depends(get_chamado_repository),
+        admin_user: dict = Depends(require_admin_role)
 ):
     success = repo.delete(chamado_id)
     if not success:
@@ -142,7 +155,7 @@ def add_visita_ao_chamado(
         chamado_id: int,
         visita_in: VisitaCreate,
         repo: InMemoryRepository = Depends(get_chamado_repository),
-        current_user: dict = Depends(get_current_active_user)
+        current_user: dict = Depends(get_current_active_user),
 ):
     """
     Adiciona uma nova visita ao chamado.
@@ -155,7 +168,9 @@ def add_visita_ao_chamado(
         raise HTTPException(status_code=404, detail="Chamado não encontrado")
 
     if chamado.get('id_tecnico_atribuido') != logged_user_id:
-        raise HTTPException(status_code=403, detail="Você não tem permissão para adicionar uma visita neste chamado.")
+        if current_user.get("role") != "admin":
+            raise HTTPException(status_code=403,
+                                detail="Você não tem permissão para adicionar uma visita neste chamado.")
 
     visita_data = visita_in.dict()
 
@@ -175,14 +190,20 @@ def add_visita_ao_chamado(
 @router.get("/{chamado_id}/custos", response_model=CustoTotalResponse)
 def get_custos_do_chamado(
         chamado_id: int,
-        repo: InMemoryRepository = Depends(get_chamado_repository)
+        repo: InMemoryRepository = Depends(get_chamado_repository),
+        current_user: dict = Depends(get_current_active_user)
 ):
     chamado = repo.get_by_id(chamado_id)
-    if not chamado:
-        raise HTTPException(status_code=404, detail="Chamado não encontrado")
+    if not chamado or chamado.get('is_cancelled', False):
+        raise HTTPException(status_code=404, detail="Chamado não encontrado ou cancelado.")
+
+    user_id = current_user.get("user_id")
+    user_role = current_user.get("role")
+    id_tecnico_atribuido = chamado.get('id_tecnico_atribuido')
+
+    if user_role == "tecnico" and id_tecnico_atribuido != user_id:
+        raise HTTPException(status_code=403, detail="Acesso negado aos custos deste chamado.")
 
     service = CustoService()
-
     custos = service.calcular_custo_chamado(chamado)
-
     return custos
