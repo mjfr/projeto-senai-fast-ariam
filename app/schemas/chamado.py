@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field
 from datetime import date
 from typing import Optional, List
 from .visita import Visita
-from .cliente import Cliente
+# from .cliente import Cliente
 
 
 class ChamadoBase(BaseModel):
@@ -12,6 +12,7 @@ class ChamadoBase(BaseModel):
     pedido: Optional[str] = None
     data_faturamento: Optional[date] = None
     em_garantia: bool = True
+    data_conclusao: Optional[date] = None
 
 
 class ChamadoCreate(ChamadoBase):
@@ -25,7 +26,7 @@ class Chamado(ChamadoBase):
     id_tecnico_atribuido: Optional[int] = None
     visitas: List[Visita] = List[dict]
     is_cancelled: bool = False
-    cliente: Cliente
+    # cliente: Cliente
 
     class Config:
         from_attributes = True
@@ -38,3 +39,4 @@ class ChamadoUpdate(BaseModel):
     id_tecnico_atribuido: Optional[int] = None
     status: Optional[str] = None
     is_cancelled: Optional[bool] = None
+    data_conclusao: Optional[date] = None
