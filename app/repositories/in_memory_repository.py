@@ -64,6 +64,11 @@ class InMemoryRepository:
                         if field in row:
                             row[field] = row[field] == 'True'
 
+                    optional_date_fields = ['data_conclusao', 'data_faturamento']
+                    for field in optional_date_fields:
+                        if field in row and row[field] == '':
+                            row[field] = None
+
                     data.append(row)
                 return data
         except FileNotFoundError:
