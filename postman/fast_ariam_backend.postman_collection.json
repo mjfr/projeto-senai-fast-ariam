@@ -204,6 +204,46 @@
 					"response": []
 				},
 				{
+					"name": "Alterar Senha",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tecnico_1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"old_password\": \"senhaSuperSecreta123\",\r\n    \"new_password\": \"senha123\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}:{{port}}/api/tecnicos/me/password",
+							"host": [
+								"{{base_url}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"tecnicos",
+								"me",
+								"password"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Deletar Técnicno (soft delete)",
 					"request": {
 						"auth": {
@@ -438,6 +478,48 @@
 								"api",
 								"chamados",
 								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Todos Chamados Com Filtro",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tecnico_2}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"cnpj\": \"12.345.678/0001-99\",\r\n  \"inscricao_estadual\": \"123.456.789.112\",\r\n  \"nome\": \"Paulo Cesar de Souza Refrigeração\",\r\n  \"telefone\": \"27996687821\",\r\n  \"email\": \"eletropaulorefrigeracao@gmail.com\",\r\n  \"password\": \"senhaSuperSecreta123\",\r\n  \"dados_bancarios\": {\r\n    \"banco\": \"Banco do Brasil\",\r\n    \"agencia\": \"1234-5\",\r\n    \"conta\": \"54321-0\",\r\n    \"pix\": \"12345678000199\"\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}:{{port}}/api/chamados?is_cancelled=false",
+							"host": [
+								"{{base_url}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"chamados"
+							],
+							"query": [
+								{
+									"key": "is_cancelled",
+									"value": "false"
+								}
 							]
 						}
 					},
@@ -742,7 +824,97 @@
 								},
 								{
 									"key": "password",
-									"value": "senhaSuperSecreta123",
+									"value": "senha123",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}:{{port}}/api/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login (técnico 2 - teste)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJlbGV0cm9wYXVsb3JlZnJpZ2VyYWNhb0BnbWFpbC5jb20iLCJ1c2VyX2lkIjoxLCJleHAiOjE3NjEzNjMxODB9.Jq_FQyCSZ2qDxv0LPhxDMYb1Fb7WRn5jiJSRyD_gXw8",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "username",
+									"value": "comercio.mariahelena@outlook.com",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "outraSenhaBemSegura456",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}:{{port}}/api/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login (técnico 3 - teste)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJlbGV0cm9wYXVsb3JlZnJpZ2VyYWNhb0BnbWFpbC5jb20iLCJ1c2VyX2lkIjoxLCJleHAiOjE3NjEzNjMxODB9.Jq_FQyCSZ2qDxv0LPhxDMYb1Fb7WRn5jiJSRyD_gXw8",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "username",
+									"value": "joaodaconstrucao@hotmail.com",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "senhaFortissimaXYZ789",
 									"type": "text"
 								}
 							]

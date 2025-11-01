@@ -2,7 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, Response, Query
 from typing import List, Optional
 from app.schemas.tecnico import Tecnico, TecnicoCreate, DadosBancarios, TecnicoUpdate, DadosBancariosUpdate
 from app.repositories.in_memory_repository import InMemoryRepository
-from app.core.security import hash_password, require_admin_role, get_current_active_user
+from app.core.security import hash_password, require_admin_role, get_current_active_user, verify_password
+from app.schemas.token import PasswordUpdate
 
 router = APIRouter()
 
@@ -65,6 +66,31 @@ def update_tecnico(
         raise HTTPException(status_code=404, detail="Técnico não encontrado.")
 
     return Tecnico(**updated_tecnico)
+
+
+@router.patch("/me/password", status_code=204)
+def update_current_user_password(
+        password_data: PasswordUpdate,
+        repo: InMemoryRepository = Depends(get_tecnico_repository),
+        current_user: dict = Depends(get_current_active_user)
+):
+    """
+    Permite que o usuário logado altere sua própria senha.
+    """
+    user_id = current_user.get("user_id")
+
+    user_db = repo.get_by_id(user_id)
+    if not user_db:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado.")
+
+    current_hash = user_db.get("password_hash")
+    if not verify_password(password_data.old_password, current_hash):
+        raise HTTPException(status_code=400, detail="Senha antiga incorreta.")
+
+    new_password_hash = hash_password(password_data.new_password)
+    repo.update(user_id, {"password_hash": new_password_hash})
+
+    return Response(status_code=204)
 
 
 @router.delete("/{tecnico_id}", status_code=204)
