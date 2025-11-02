@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 from datetime import date
 from typing import List, Optional
 from .base_schemas import Material, TipoDefeitoPrincipal, SubDefeitoRefrigeracao, SubDefeitoCompressor, \
@@ -28,8 +28,8 @@ class VisitaBase(BaseModel):
             {"nome": "Gás R-134a", "quantidade": 2, "valor": 50.00}
         ]
     )
-    servico_finalizado: bool = Field(..., description="O serviço neste chamado foi concluído nesta visita?",
-                                     example=True)
+    servico_finalizado: bool = Field(False,
+                                     description="O serviço foi finalizado? Falso na criação. Usar PATCH para finalizar.")
     pendencia: Optional[str] = Field(None, description="Se o serviço não foi finalizado, qual a pendência?",
                                      example="Aguardando peça X.")
     nome_ajudante: Optional[str] = Field(None, example="Carlos Silva", description="Nome do ajudante, se houver.")
@@ -53,6 +53,12 @@ class VisitaBase(BaseModel):
                                                                 description="Detalhes do defeito de Iluminação")
     sub_defeitos_estrutura: List[SubDefeitoEstrutura] = Field(default=[],
                                                               description="Detalhes do defeito de Estrutura")
+
+@model_validator(mode='after')
+def check_finalizacao_na_criacao(self) -> 'VisitaBase':
+    if self.servico_finalizado is True:
+        raise ValueError("Não é possível criar uma visita já finalizada. Finalize via PATCH após os uploads.")
+    return self
 
 
 class VisitaCreate(VisitaBase):

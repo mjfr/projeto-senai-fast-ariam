@@ -4,7 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from app.api.router import api_router
 
 # TODO: Lembrar de documentar melhor as classes, métodos e utilizar as docstrings para melhorar as descrições no Swagger
-# TODO: A visita é a parte mais complicada até o momento do desenvolvimento, logo, ela recebe um cuidado maior nas documentações, depois, fazer o mesmo para todo o resto.
+# TODO: Durante a refatoração, documentação e validações, lembrar de alterar algumas ordens dos atributos dos retornos dos Endpoints
 
 app = FastAPI(
     title="Fast Ariam API",

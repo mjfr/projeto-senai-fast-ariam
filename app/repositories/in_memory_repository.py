@@ -70,7 +70,7 @@ class InMemoryRepository:
                         if field in row:
                             row[field] = row[field] == 'True'
 
-                    optional_date_fields = ['data_conclusao', 'data_faturamento']
+                    optional_date_fields = ['data_conclusao', 'data_faturamento', 'data_agendamento']
                     for field in optional_date_fields:
                         if field in row and row[field] == '':
                             row[field] = None

@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Response, File, Up
 from typing import List, Optional
 from datetime import date
 from app.api.endpoints.tecnicos import get_tecnico_repository
-from app.core.security import get_current_active_user, require_admin_role
+from app.core.security import get_current_active_user, require_admin_role, require_technician_role
 from app.repositories.in_memory_repository import InMemoryRepository, deep_update
 from app.schemas.chamado import Chamado, ChamadoCreate, ChamadoUpdate
 from app.schemas.visita import Visita, VisitaCreate, VisitaUpdate
@@ -30,6 +30,9 @@ def create_chamado(
     chamado_data['data_abertura'] = date.today()
     chamado_data['visitas'] = []
     chamado_data['is_cancelled'] = False
+
+    if chamado_data['id_tecnico_atribuido'] is not None:
+        chamado_data['status'] = "Agendado"
 
     chamado_criado_dict = repo.create(chamado_data)
     return Chamado(**chamado_criado_dict)
@@ -90,6 +93,11 @@ def update_chamado(
         tecnico_repo: InMemoryRepository = Depends(get_tecnico_repository),
         _admin_user: dict = Depends(require_admin_role)
 ):
+    """
+    O administrador atualiza qualquer dado de um chamado.
+    Esse endpoint é utilizado também para atribuir um técnico e uma data de agendamento caso não tenham sido atribuídos na criação do chamado.
+    Também permite o administrador reabrir o chamado se necessário.
+    """
     update_data = chamado_in.model_dump(exclude_unset=True)
     if not update_data:
         raise HTTPException(status_code=400, detail="Nenhum dado para atualizar foi fornecido.")
@@ -114,8 +122,7 @@ def update_chamado(
     if updated_chamado is None:
         raise HTTPException(status_code=404, detail="Chamado não encontrado.")
 
-    resposta_completa = updated_chamado.copy()
-    return Chamado(**resposta_completa)
+    return Chamado(**updated_chamado)
 
 
 @router.delete("/{chamado_id}", status_code=204)
@@ -209,13 +216,13 @@ def update_visita_em_chamado(
     Atualiza os dados de uma visita específica.
     Permite ao técnico corrigir campos preenchidos de forma incorreta como KM, materiais, descrição, etc.
     """
-    logged_user_id = current_user.get("user_id")
-    user_role = current_user.get("role")
 
     chamado = repo.get_by_id(chamado_id)
     if not chamado or chamado.get('is_cancelled', False):
         raise HTTPException(status_code=404, detail="Chamado não encontrado ou cancelado")
 
+    logged_user_id = current_user.get("user_id")
+    user_role = current_user.get("role")
     if user_role == "tecnico" and chamado.get('id_tecnico_atribuido') != logged_user_id:
         raise HTTPException(status_code=403, detail="Você não tem permissão para editar visitas deste chamado.")
 
@@ -225,28 +232,70 @@ def update_visita_em_chamado(
     if not update_data:
         raise HTTPException(status_code=400, detail="Nenhum dado para atualizar foi fornecido.")
 
-    visita_atualizada_dict = deep_update(visita_para_atualizar, update_data)
-    servico_finalizado_novo = visita_atualizada_dict.get('servico_finalizado')
-    assinatura_url = visita_atualizada_dict.get('assinatura_cliente_url')
-    pendencia = visita_atualizada_dict.get('pendencia')
-    dados_update_chamado = {}
+    visita_atualizada_dict = deep_update(visita_para_atualizar.copy(), update_data)
+    if visita_atualizada_dict.get('servico_finalizado') is True:
+        if not visita_atualizada_dict.get('assinatura_cliente_url'):
+            raise HTTPException(status_code=400, detail="Assinatura do cliente é obrigatória para finalizar a visita.")
 
-    if servico_finalizado_novo is True:
-        if not assinatura_url:
-            raise HTTPException(status_code=400,
-                                detail="Assinatura do cliente é obrigatória para finalizar a ordem de serviço.")
-        dados_update_chamado['status'] = "Finalizado"
-        dados_update_chamado['data_conclusao'] = date.today()
-    elif servico_finalizado_novo is False:
-        dados_update_chamado['status'] = "Pendente" if pendencia else "Em Atendimento"
-        dados_update_chamado['data_conclusao'] = None
+        if visita_atualizada_dict.get('km_total', 0) > 0:
+            if not visita_atualizada_dict.get('odometro_inicio_url') or not visita_atualizada_dict.get(
+                    'odometro_fim_url'):
+                raise HTTPException(status_code=400,
+                                    detail="Fotos do odômetro de início e fim são obrigatórias se km_total > 0.")
+
+        if visita_atualizada_dict.get('valor_pedagio', 0.0) > 0:
+            if not visita_atualizada_dict.get('comprovante_pedagio_urls'):
+                raise HTTPException(status_code=400,
+                                    detail="Comprovante(s) de pedágio são obrigatórios se valor_pedagio > 0.")
+
+        if visita_atualizada_dict.get('valor_frete_devolucao', 0.0) > 0:
+            if not visita_atualizada_dict.get('comprovante_frete_urls'):
+                raise HTTPException(status_code=400,
+                                    detail="Comprovante(s) de frete são obrigatórios se valor_frete_devolucao > 0.")
+
+        dados_update_chamado = {"status": "Finalizado", "data_conclusao": date.today()}
+        repo.update(chamado_id, dados_update_chamado)
+
+    elif visita_atualizada_dict.get('servico_finalizado') is False:
+        pendencia = visita_atualizada_dict.get('pendencia')
+        dados_update_chamado = {
+            "status": "Pendente" if pendencia else "Em Atendimento",
+            "data_conclusao": None
+        }
+        repo.update(chamado_id, dados_update_chamado)
 
     chamado['visitas'][visita_index] = visita_atualizada_dict
-    dados_update_chamado['visitas'] = chamado['visitas']
-    repo.update(chamado_id, dados_update_chamado)
+    repo.update(chamado_id, {"visitas": chamado['visitas']})
 
     return Visita(**visita_atualizada_dict)
 
+
+@router.post("/{chamado_id}/iniciar-atendimento", response_model=Chamado)
+def tecnico_inicia_atendimento(
+        chamado_id: int,
+        repo: InMemoryRepository = Depends(get_chamado_repository),
+        current_user: dict = Depends(require_technician_role)
+):
+    """
+    Valida se o chamado pertence ao técnico logado e altera o status de um chamado para 'Em Atendimento'.
+    """
+    logged_in_user_id = current_user.get("user_id")
+
+    chamado = repo.get_by_id(chamado_id)
+    if not chamado or chamado.get('is_cancelled', False):
+        raise HTTPException(status_code=404, detail="Chamado não encontrado ou cancelado")
+
+    if chamado.get('id_tecnico_atribuido') != logged_in_user_id:
+        raise HTTPException(status_code=403, detail="Você não tem permissão para iniciar este chamado.")
+
+    if chamado.get('status') not in ["Agendado", "Pendente"]:
+        raise HTTPException(status_code=400,
+                            detail=f"Não é possível iniciar um chamado com status '{chamado.get('status')}'")
+
+    update_data = {"status": "Em Atendimento"}
+    updated_chamado = repo.update(chamado_id, update_data)
+
+    return Chamado(**updated_chamado)
 
 @router.get("/{chamado_id}/custos", response_model=CustoTotalResponse)
 def get_custos_do_chamado(

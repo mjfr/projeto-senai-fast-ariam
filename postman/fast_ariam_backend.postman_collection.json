@@ -306,7 +306,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{base_url}}:{{port}}/api/chamados/2/visitas",
+									"raw": "{{base_url}}:{{port}}/api/chamados/1/visitas",
 									"host": [
 										"{{base_url}}"
 									],
@@ -314,7 +314,7 @@
 									"path": [
 										"api",
 										"chamados",
-										"2",
+										"1",
 										"visitas"
 									]
 								}
@@ -478,7 +478,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"cliente_id\": 1,\r\n  \"descricao_cliente\": \"Descrição do problema que o cliente descreveu.\",\r\n  \"numero_serie_equipamento\": \"1411224002524-F01\",\r\n  \"pedido\": \"5314024-1\",\r\n  \"data_faturamento\": \"2025-03-07\",\r\n  \"em_garantia\": true\r\n}",
+							"raw": "{\r\n  \"cliente_id\": 1,\r\n  \"descricao_cliente\": \"Descrição do problema que o cliente descreveu.\",\r\n  \"numero_serie_equipamento\": \"1411224002524-F01\",\r\n  \"pedido\": \"5314024-1\",\r\n  \"data_faturamento\": \"2025-03-07\",\r\n  \"data_agendamento\": \"2025-11-03\",\r\n  \"em_garantia\": true,\r\n  \"id_tecnico_atribuido\": 1\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -546,7 +546,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "{{token_tecnico_3}}",
+									"value": "{{token_tecnico_1}}",
 									"type": "string"
 								}
 							]
@@ -698,6 +698,37 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Iniciar Atendimento",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tecnico_1}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}:{{port}}/api/chamados/1/iniciar-atendimento",
+							"host": [
+								"{{base_url}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"chamados",
+								"1",
+								"iniciar-atendimento"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -707,6 +738,16 @@
 				{
 					"name": "Novo Cliente",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tecnico_2}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [],
 						"body": {
