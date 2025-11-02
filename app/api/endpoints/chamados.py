@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Response, File, Up
 from typing import List, Optional
 from datetime import date
 from app.api.endpoints.tecnicos import get_tecnico_repository
-from app.core.security import get_current_active_user, require_admin_role, require_technician_role
+from app.core.security import get_current_active_user, require_admin_role
 from app.repositories.in_memory_repository import InMemoryRepository, deep_update
 from app.schemas.chamado import Chamado, ChamadoCreate, ChamadoUpdate
 from app.schemas.visita import Visita, VisitaCreate, VisitaUpdate
@@ -14,6 +14,7 @@ router = APIRouter()
 MULTI_FILE_FIELDS = ["comprovante_pedagio_urls", "comprovante_frete_urls"]
 SINGLE_FILE_FIELDS = ["odometro_inicio_url", "odometro_fim_url", "assinatura_cliente_url"]
 
+
 # Injetando o repositório que vai ser utilizado
 def get_chamado_repository():
     return InMemoryRepository("chamados")
@@ -23,9 +24,9 @@ def get_chamado_repository():
 def create_chamado(
         chamado_in: ChamadoCreate,
         repo: InMemoryRepository = Depends(get_chamado_repository),
-        admin_user: dict = Depends(require_admin_role)
+        _admin_user: dict = Depends(require_admin_role)
 ):
-    chamado_data = chamado_in.dict()
+    chamado_data = chamado_in.model_dump()
     chamado_data['data_abertura'] = date.today()
     chamado_data['visitas'] = []
     chamado_data['is_cancelled'] = False
@@ -87,9 +88,9 @@ def update_chamado(
         chamado_in: ChamadoUpdate,
         repo: InMemoryRepository = Depends(get_chamado_repository),
         tecnico_repo: InMemoryRepository = Depends(get_tecnico_repository),
-        admin_user: dict = Depends(require_admin_role)
+        _admin_user: dict = Depends(require_admin_role)
 ):
-    update_data = chamado_in.dict(exclude_unset=True)
+    update_data = chamado_in.model_dump(exclude_unset=True)
     if not update_data:
         raise HTTPException(status_code=400, detail="Nenhum dado para atualizar foi fornecido.")
 
@@ -98,7 +99,8 @@ def update_chamado(
         if novo_tecnico_id is not None:
             tecnico_db = tecnico_repo.get_by_id(novo_tecnico_id)
             if not tecnico_db or not tecnico_db.get('is_active', True):
-                raise HTTPException(status_code=404, detail=f"Técnico com id {novo_tecnico_id} não encontrado ou inativo.")
+                raise HTTPException(status_code=404,
+                                    detail=f"Técnico com id {novo_tecnico_id} não encontrado ou inativo.")
             if 'status' not in update_data:
                 update_data['status'] = 'Agendado'
 
@@ -112,8 +114,6 @@ def update_chamado(
     if updated_chamado is None:
         raise HTTPException(status_code=404, detail="Chamado não encontrado.")
 
-    cliente_final_id = updated_chamado.get('cliente_id')
-
     resposta_completa = updated_chamado.copy()
     return Chamado(**resposta_completa)
 
@@ -122,7 +122,7 @@ def update_chamado(
 def delete_chamado(
         chamado_id: int,
         repo: InMemoryRepository = Depends(get_chamado_repository),
-        admin_user: dict = Depends(require_admin_role)
+        _admin_user: dict = Depends(require_admin_role)
 ):
     success = repo.delete(chamado_id)
     if not success:
@@ -153,29 +153,48 @@ def add_visita_ao_chamado(
             raise HTTPException(status_code=403,
                                 detail="Você não tem permissão para adicionar uma visita neste chamado.")
 
-    visita_data = visita_in.dict()
+    if visita_in.servico_finalizado:
+        raise HTTPException(status_code=400,
+                            detail="Não é possível criar uma visita já finalizada. Crie a visita, faça os uploads e depois finalize-a.")
+
+    visita_data = visita_in.model_dump()
 
     if not chamado.get('visitas'):
         chamado['visitas'] = []
         visita_id = 1
     else:
-        visita_id = max(v.get('id', 0) for v in chamado['visitas']) + 1
+        visitas_existentes = chamado.get('visitas', [])
+        if not visitas_existentes:
+            visita_id = 1
+        else:
+            visita_id = max(v.get('id', 0) for v in visitas_existentes) + 1
 
     visita_data['id'] = visita_id
     chamado['visitas'].append(visita_data)
 
     dados_update_chamado = {"visitas": chamado['visitas']}
-    if not visita_in.servico_finalizado and visita_in.pendencia:
+    if visita_in.pendencia:
         dados_update_chamado['status'] = "Pendente"
-    elif visita_in.servico_finalizado:
-        dados_update_chamado['status'] = "Finalizado"
-        dados_update_chamado['data_conclusao'] = date.today()
     else:
         dados_update_chamado['status'] = "Em Atendimento"
 
     repo.update(chamado_id, dados_update_chamado)
 
     return Visita(**visita_data)
+
+
+def _find_visit(chamado: dict, visita_id: int) -> tuple[int, dict]:
+    visita_para_atualizar = None
+    visita_index = -1
+    for index, visita in enumerate(chamado.get('visitas', [])):
+        if visita.get('id') == visita_id:
+            visita_para_atualizar = visita
+            visita_index = index
+            break
+
+    if not visita_para_atualizar:
+        raise HTTPException(status_code=404, detail=f"Visita com ID {visita_id} não encontrada neste chamado.")
+    return visita_index, visita_para_atualizar
 
 
 @router.patch("/{chamado_id}/visitas/{visita_id}", response_model=Visita)
@@ -200,24 +219,31 @@ def update_visita_em_chamado(
     if user_role == "tecnico" and chamado.get('id_tecnico_atribuido') != logged_user_id:
         raise HTTPException(status_code=403, detail="Você não tem permissão para editar visitas deste chamado.")
 
-    visita_para_atualizar = None
-    visita_index = -1
-    for index, visita in enumerate(chamado.get('visitas', [])):
-        if visita.get('id') == visita_id:
-            visita_para_atualizar = visita
-            visita_index = index
-            break
+    visita_index, visita_para_atualizar = _find_visit(chamado, visita_id)
 
-    if not visita_para_atualizar:
-        raise HTTPException(status_code=404, detail=f"Visita com ID {visita_id} não encontrada neste chamado.")
-
-    update_data = visita_in.dict(exclude_unset=True)
+    update_data = visita_in.model_dump(exclude_unset=True)
     if not update_data:
         raise HTTPException(status_code=400, detail="Nenhum dado para atualizar foi fornecido.")
 
     visita_atualizada_dict = deep_update(visita_para_atualizar, update_data)
+    servico_finalizado_novo = visita_atualizada_dict.get('servico_finalizado')
+    assinatura_url = visita_atualizada_dict.get('assinatura_cliente_url')
+    pendencia = visita_atualizada_dict.get('pendencia')
+    dados_update_chamado = {}
+
+    if servico_finalizado_novo is True:
+        if not assinatura_url:
+            raise HTTPException(status_code=400,
+                                detail="Assinatura do cliente é obrigatória para finalizar a ordem de serviço.")
+        dados_update_chamado['status'] = "Finalizado"
+        dados_update_chamado['data_conclusao'] = date.today()
+    elif servico_finalizado_novo is False:
+        dados_update_chamado['status'] = "Pendente" if pendencia else "Em Atendimento"
+        dados_update_chamado['data_conclusao'] = None
+
     chamado['visitas'][visita_index] = visita_atualizada_dict
-    repo.update(chamado_id, {"visitas": chamado['visitas']})
+    dados_update_chamado['visitas'] = chamado['visitas']
+    repo.update(chamado_id, dados_update_chamado)
 
     return Visita(**visita_atualizada_dict)
 
@@ -271,16 +297,7 @@ def upload_file_visita(
     if user_role == "tecnico" and chamado.get('id_tecnico_atribuido') != logged_user_id:
         raise HTTPException(status_code=403, detail="Você não tem permissão para este chamado.")
 
-    visita_para_atualizar = None
-    visita_index = -1
-    for index, visita in enumerate(chamado.get('visitas', [])):
-        if visita.get('id') == visita_id:
-            visita_para_atualizar = visita
-            visita_index = index
-            break
-
-    if not visita_para_atualizar:
-        raise HTTPException(status_code=404, detail=f"Visita com ID {visita_id} não encontrada neste chamado.")
+    visita_index, visita_para_atualizar = _find_visit(chamado, visita_id)
 
     valid_fields = SINGLE_FILE_FIELDS + MULTI_FILE_FIELDS
     if file_type not in valid_fields:
