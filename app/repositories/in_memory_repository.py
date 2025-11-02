@@ -8,6 +8,7 @@ from datetime import date
 TECNICOS_CSV = 'tecnicos_db.csv'
 CHAMADOS_CSV = 'chamados_db.csv'
 
+
 def deep_update(d, u):
     for k, v in u.items():
         if isinstance(v, collections.abc.Mapping):
@@ -15,6 +16,7 @@ def deep_update(d, u):
         else:
             d[k] = v
     return d
+
 
 def json_converter(o):
     if isinstance(o, date):
@@ -39,7 +41,8 @@ class InMemoryRepository:
                 data = []
                 for row in reader:
 
-                    int_fields = ['id', 'cliente_id', 'id_tecnico_atribuido', 'codigo'] # Resolve os problemas de ints tratadas como strings
+                    int_fields = ['id', 'cliente_id', 'id_tecnico_atribuido',
+                                  'codigo']  # Resolve os problemas de ints tratadas como strings
                     for field in int_fields:
                         if field in row:
                             value = row[field]
@@ -51,7 +54,9 @@ class InMemoryRepository:
                                 except (ValueError, TypeError):
                                     row[field] = None
 
-                    json_fields = ['dados_bancarios', 'cliente', 'visitas', 'materiais_utilizados', "contato_principal"] # Resolve os problemas de JSON aninhado que são tratados como strings
+                    json_fields = ['dados_bancarios', 'cliente', 'visitas', 'materiais_utilizados', "contato_principal",
+                                   'comprovante_pedagio_urls',
+                                   'comprovante_frete_urls']  # Resolve os problemas de JSON aninhado que são tratados como strings
                     for field in json_fields:
                         if field in row and row[field]:
                             try:
@@ -59,7 +64,8 @@ class InMemoryRepository:
                             except json.JSONDecodeError:
                                 pass
 
-                    bool_fields = ['is_active', 'is_cancelled', 'em_garantia'] # Resolve os problemas de booleans sendo tratados como strings
+                    bool_fields = ['is_active', 'is_cancelled',
+                                   'em_garantia']  # Resolve os problemas de booleans sendo tratados como strings
                     for field in bool_fields:
                         if field in row:
                             row[field] = row[field] == 'True'

@@ -1,17 +1,18 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, Response
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, File, UploadFile, Form
 from typing import List, Optional
 from datetime import date
-
 from app.api.endpoints.tecnicos import get_tecnico_repository
 from app.core.security import get_current_active_user, require_admin_role, require_technician_role
 from app.repositories.in_memory_repository import InMemoryRepository
 from app.schemas.chamado import Chamado, ChamadoCreate, ChamadoUpdate
-from app.schemas.visita import Visita, VisitaCreate
+from app.schemas.visita import Visita, VisitaCreate, VisitaUpdate
 from app.schemas.custo import CustoTotalResponse
 from app.services.custo_service import CustoService
+from app.services.file_service import save_upload_file
 
 router = APIRouter()
-
+MULTI_FILE_FIELDS = ["comprovante_pedagio_urls", "comprovante_frete_urls"]
+SINGLE_FILE_FIELDS = ["odometro_inicio_url", "odometro_fim_url", "assinatura_cliente_url"]
 
 # Injetando o repositório que vai ser utilizado
 def get_chamado_repository():
@@ -194,3 +195,63 @@ def get_custos_do_chamado(
     service = CustoService()
     custos = service.calcular_custo_chamado(chamado)
     return custos
+
+
+@router.post("/{chamado_id}/visitas/{visita_id}/upload_file", response_model=Visita)
+def upload_file_visita(
+        chamado_id: int,
+        visita_id: int,
+        repo: InMemoryRepository = Depends(get_chamado_repository),
+        current_user: dict = Depends(get_current_active_user),
+        file: UploadFile = File(...),
+        file_type: str = Form(..., description="Campo da visita para ser atualizado (URL do arquivo)."),
+):
+    """
+    Permite o upload de um arquivo para uma visita específica, precisa de autenticação e autoria sobre o chamado.
+    Se o campo file_type indicar uma lista, mais de uma foto poderá ser enviada (para casos de múltiplos comprovantes),
+    caso contrário, o campo receberá uma única foto (sobrescreve a URL do arquivo já existente, sem apagar o mesmo).
+
+    *OBS: Para enviar múltiplos arquivos, é necessário enviar UM por chamada. Múltiplos arquivos em uma única chamada serão ignorados.
+    """
+
+    logged_user_id = current_user.get("user_id")
+    chamado = repo.get_by_id(chamado_id)
+    user_role = current_user.get("role")
+
+    if not chamado or chamado.get('is_cancelled', False):
+        raise HTTPException(status_code=404, detail="Chamado não encontrado ou cancelado.")
+
+    if user_role == "tecnico" and chamado.get('id_tecnico_atribuido') != logged_user_id:
+        raise HTTPException(status_code=403, detail="Você não tem permissão para este chamado.")
+
+    visita_para_atualizar = None
+    visita_index = -1
+    for index, visita in enumerate(chamado.get('visitas', [])):
+        if visita.get('id') == visita_id:
+            visita_para_atualizar = visita
+            visita_index = index
+            break
+
+    if not visita_para_atualizar:
+        raise HTTPException(status_code=404, detail=f"Visita com ID {visita_id} não encontrada neste chamado.")
+
+    valid_fields = SINGLE_FILE_FIELDS + MULTI_FILE_FIELDS
+    if file_type not in valid_fields:
+        raise HTTPException(status_code=400, detail=f"Tipo de arquivo inválido: '{file_type}'.")
+
+    prefixo_nome_arquivo = f"chamado_{chamado_id}_visita_{visita_id}_{file_type}"
+    file_url = save_upload_file(file, prefixo_nome_arquivo)
+
+    if file_type in SINGLE_FILE_FIELDS:
+        visita_para_atualizar[file_type] = file_url
+    elif file_type in MULTI_FILE_FIELDS:
+        current_list = visita_para_atualizar.get(file_type, [])
+        if not isinstance(current_list, list):
+            current_list = []
+        current_list.append(file_url)
+        visita_para_atualizar[file_type] = current_list
+
+    chamado['visitas'][visita_index] = visita_para_atualizar
+    repo.update(chamado_id, {"visitas": chamado['visitas']})
+
+    return Visita(**visita_para_atualizar)

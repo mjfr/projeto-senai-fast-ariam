@@ -320,6 +320,54 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "Upload de Foto (odometro_incio)",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token_tecnico_3}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "file_type",
+											"value": "odometro_inicio_url",
+											"type": "text"
+										},
+										{
+											"key": "file",
+											"type": "file",
+											"src": "/F:/Users/matas/Desktop/3qqfzg730hkc1.png"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}:{{port}}/api/chamados/1/visitas/1/upload_file",
+									"host": [
+										"{{base_url}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"chamados",
+										"1",
+										"visitas",
+										"1",
+										"upload_file"
+									]
+								}
+							},
+							"response": []
 						}
 					]
 				},
@@ -457,7 +505,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "{{token_tecnico_2}}",
+									"value": "{{token_tecnico_3}}",
 									"type": "string"
 								}
 							]
@@ -469,7 +517,7 @@
 							"raw": "{\r\n    \"cliente\": {\r\n        \"razao_social\": \"Auto Serviço Peixodo LTDA\",\r\n        \"contato_principal\": {\r\n            \"nome\": \"Karina\",\r\n            \"telefone\": \"(27) 9 9643-9718\"\r\n        },\r\n        \"telefone\": \"(27) 3251-1264\",\r\n        \"endereco\": \"Praça João Miguel\",\r\n        \"numero\": \"132\",\r\n        \"bairro\": \"Serra Centro\",\r\n        \"cidade\": \"Serra\",\r\n        \"uf\": \"ES\",\r\n        \"codigo\": \"55835\",\r\n        \"pedido\": \"5314024-1\",\r\n        \"data_faturamento\": \"2025-03-07\",\r\n        \"em_garantia\": true\r\n    },\r\n    \"descricao_cliente\": \"Equipamento está formando gelo em excesso na parte interna.\",\r\n    \"numero_serie_equipamento\": \"1411224002524-F01\"\r\n}"
 						},
 						"url": {
-							"raw": "{{base_url}}:{{port}}/api/chamados/2",
+							"raw": "{{base_url}}:{{port}}/api/chamados/1",
 							"host": [
 								"{{base_url}}"
 							],
@@ -477,7 +525,7 @@
 							"path": [
 								"api",
 								"chamados",
-								"2"
+								"1"
 							]
 						}
 					},
