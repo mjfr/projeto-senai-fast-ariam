@@ -1,6 +1,68 @@
 from pydantic import BaseModel
+from enum import Enum
 
 class Material(BaseModel):
     nome: str
     quantidade: int
     valor: float
+
+class TipoDefeitoPrincipal(str, Enum):
+    """Categorias principais de defeito"""
+    REFRIGERACAO = "Refrigeração"
+    ILUMINACAO = "Iluminação"
+    ESTRUTURA = "Estrutura"
+    OUTROS = "Outros"
+
+class SubDefeitoRefrigeracao(str, Enum):
+    """Sub-categorias para defeitos de Refrigeração"""
+    COMPRESSOR = "Compressor"
+    VAZAMENTO = "Vazamento"
+    OUTROS = "Outros (Refrigeração)"
+
+class SubDefeitoCompressor(str, Enum):
+    """Sub-categorias para defeitos de Compressão"""
+    QUEIMADO = "Queimado"
+    EM_MASSA = "Em Massa"
+    EM_CURTO = "Em Curto"
+    CORRENTE_ALTA = "Corrente Alta"
+    NAO_PARTE = "Não Parte"
+    SEM_COMPRESSAO = "Sem Compressão"
+    TRAVADO = "Travado"
+    COM_BARULHO = "Com Barulho"
+    NAO_SUCCIONA = "Não Succiona"
+    DESARMADO = "Desarmado"
+
+class SubDefeitoVazamento(str, Enum):
+    """Sub-categorias para defeitos de Vazamento"""
+    N_PONTO = "Nº Ponto"
+    NAO_LOCALIZADO = "Não Localizado"
+
+class SubDefeitoOutros(str, Enum):
+    """Sub-categorias para Outros defeitos"""
+    FILTRO_ENTUPIDO = "Filtro Entupido"
+    CAPILAR_OBSTRUIDO = "Capilar Obstruído"
+    MICROMOTOR_QUEIMADO = "Micromotor Queimado"
+    MICROMOTOR_TRAVADO = "Micromotor Travado"
+    CONTROLADOR_QUEIMADO = "Controlador Queimado"
+    REGULAGEM_PARAMETROS = "Regulagem Parâmetros"
+
+class SubDefeitoIluminacao(str, Enum):
+    """Sub-categorias para defeitos de Iluminação"""
+    LAMPADA_QUEIMADA = "Lâmpada Queimada"
+    SEM_ALIMENTACAO = "Sem Alimentação"
+    EM_CURTO = "Em Curto"
+
+class SubDefeitoEstrutura(str, Enum):
+    """Sub-categorias para defeitos de Estrutura"""
+    PERFIL_CURVO_VIDRO = "01 - Perfil Curvo Vidro"
+    PERFIL_SUPORTE_ILUMINACAO = "02 - Perfil Suporte Iluminação"
+    LENTE_CALHA_ILUMINACAO = "03 - Lente Calha Iluminação"
+    PERFIL_VEDACAO = "04 - Perfil Vedação"
+    PERFIL_PORTA_ETIQUETA = "05 - Perfil Porta Etiqueta"
+    PUXADOR = "06 - Puxador"
+    PORTA_PARACHOQUE = "07 - Porta Parachoque"
+    CANTO_90 = "08 - Canto 90°"
+    ACRILICO_CAREL = "09 - Acrílico Carel"
+    PERFIL_FRONTAL = "10 - Perfil Frontal"
+    PARACHOQUE_FRONTAL = "11 - Parachoque Frontal"
+    PARACHOQUE_LATERAL = "12 - Parachoque Lateral"

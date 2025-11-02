@@ -289,7 +289,7 @@
 									"bearer": [
 										{
 											"key": "token",
-											"value": "{{token_tecnico_2}}",
+											"value": "{{token_tecnico_3}}",
 											"type": "string"
 										}
 									]
@@ -298,7 +298,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"data_visita\": \"2025-10-21\",\r\n    \"hora_inicio_deslocamento\": \"18:30\",\r\n    \"hora_chegada_cliente\": \"19:12\",\r\n    \"hora_inicio_atendimento\": \"19:20\",\r\n    \"hora_fim_atendimento\": \"21:30\",\r\n    \"km_total\": 17,\r\n    \"valor_pedagio\": 0,\r\n    \"valor_frete_devolucao\": 0,\r\n    \"descricao_servico_executado\": \"Solda no tubo de gás da ilha vertical\",\r\n    \"materiais_utilizados\": [\r\n        {\r\n            \"nome\": \"Solda Prata\",\r\n            \"quantidade\": 1,\r\n            \"valor\": 15.50\r\n        },\r\n        {\r\n            \"nome\": \"Tubo de Cobre 1/4\",\r\n            \"quantidade\": 1,\r\n            \"valor\": 25.00\r\n        }\r\n    ],\r\n    \"servico_finalizado\": true\r\n}",
+									"raw": "{\r\n    \"data_visita\": \"2025-11-05\",\r\n    \"hora_inicio_deslocamento\": \"14:00\",\r\n    \"hora_chegada_cliente\": \"14:30\",\r\n    \"hora_inicio_atendimento\": \"14:35\",\r\n    \"hora_fim_atendimento\": \"16:00\",\r\n    \"km_total\": 20,\r\n    \"descricao_servico_executado\": \"Problema de refrigeração e estrutura.\",\r\n    \"servico_finalizado\": false,\r\n    \"pendencia\": \"Aguardando nova peça de estrutura.\",\r\n    \"materiais_utilizados\": [\r\n        {\r\n            \"nome\": \"Solda Prata\",\r\n            \"quantidade\": 1,\r\n            \"valor\": 15.50\r\n        },\r\n        {\r\n            \"nome\": \"Tubo de Cobre 1/4\",\r\n            \"quantidade\": 1,\r\n            \"valor\": 25.00\r\n        }\r\n    ],\r\n    \"defeitos_principais\": [\r\n        \"Refrigeração\",\r\n        \"Estrutura\"\r\n    ],\r\n    \"sub_defeitos_refrigeracao\": [\r\n        \"Vazamento\"\r\n    ],\r\n    \"sub_defeitos_vazamento\": [\r\n        \"Nº Ponto\"\r\n    ],\r\n    \"vazamento_ponto_descricao\": \"Vazamento encontrado na união do Ponto 3 da solda.\",\r\n    \"sub_defeitos_estrutura\": [\r\n        \"07 - Porta Parachoque\"\r\n    ]\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -364,6 +364,47 @@
 										"visitas",
 										"1",
 										"upload_file"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Atualizar Visita",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token_tecnico_1}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"km_total\": 999999\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}:{{port}}/api/chamados/3/visitas/2",
+									"host": [
+										"{{base_url}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"chamados",
+										"3",
+										"visitas",
+										"2"
 									]
 								}
 							},

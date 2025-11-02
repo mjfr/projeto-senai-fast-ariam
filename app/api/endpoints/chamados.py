@@ -3,7 +3,7 @@ from typing import List, Optional
 from datetime import date
 from app.api.endpoints.tecnicos import get_tecnico_repository
 from app.core.security import get_current_active_user, require_admin_role, require_technician_role
-from app.repositories.in_memory_repository import InMemoryRepository
+from app.repositories.in_memory_repository import InMemoryRepository, deep_update
 from app.schemas.chamado import Chamado, ChamadoCreate, ChamadoUpdate
 from app.schemas.visita import Visita, VisitaCreate, VisitaUpdate
 from app.schemas.custo import CustoTotalResponse
@@ -168,11 +168,58 @@ def add_visita_ao_chamado(
     if not visita_in.servico_finalizado and visita_in.pendencia:
         dados_update_chamado['status'] = "Pendente"
     elif visita_in.servico_finalizado:
+        dados_update_chamado['status'] = "Finalizado"
+        dados_update_chamado['data_conclusao'] = date.today()
+    else:
         dados_update_chamado['status'] = "Em Atendimento"
 
     repo.update(chamado_id, dados_update_chamado)
 
     return Visita(**visita_data)
+
+
+@router.patch("/{chamado_id}/visitas/{visita_id}", response_model=Visita)
+def update_visita_em_chamado(
+        chamado_id: int,
+        visita_id: int,
+        visita_in: VisitaUpdate,
+        repo: InMemoryRepository = Depends(get_chamado_repository),
+        current_user: dict = Depends(get_current_active_user)
+):
+    """
+    Atualiza os dados de uma visita específica.
+    Permite ao técnico corrigir campos preenchidos de forma incorreta como KM, materiais, descrição, etc.
+    """
+    logged_user_id = current_user.get("user_id")
+    user_role = current_user.get("role")
+
+    chamado = repo.get_by_id(chamado_id)
+    if not chamado or chamado.get('is_cancelled', False):
+        raise HTTPException(status_code=404, detail="Chamado não encontrado ou cancelado")
+
+    if user_role == "tecnico" and chamado.get('id_tecnico_atribuido') != logged_user_id:
+        raise HTTPException(status_code=403, detail="Você não tem permissão para editar visitas deste chamado.")
+
+    visita_para_atualizar = None
+    visita_index = -1
+    for index, visita in enumerate(chamado.get('visitas', [])):
+        if visita.get('id') == visita_id:
+            visita_para_atualizar = visita
+            visita_index = index
+            break
+
+    if not visita_para_atualizar:
+        raise HTTPException(status_code=404, detail=f"Visita com ID {visita_id} não encontrada neste chamado.")
+
+    update_data = visita_in.dict(exclude_unset=True)
+    if not update_data:
+        raise HTTPException(status_code=400, detail="Nenhum dado para atualizar foi fornecido.")
+
+    visita_atualizada_dict = deep_update(visita_para_atualizar, update_data)
+    chamado['visitas'][visita_index] = visita_atualizada_dict
+    repo.update(chamado_id, {"visitas": chamado['visitas']})
+
+    return Visita(**visita_atualizada_dict)
 
 
 @router.get("/{chamado_id}/custos", response_model=CustoTotalResponse)
