@@ -5,6 +5,7 @@ from app.schemas.custo import CustoTotalResponse, CustoVisitaDetalhado, CustoMat
 
 
 def _parse_duration_in_hours(start_time_str: str, end_time_str: str) -> float:
+    """ Calcula a duração entre duas strings de hora em horas decimais."""
     try:
         t_start = datetime.strptime(start_time_str, '%H:%M')
         t_end = datetime.strptime(end_time_str, '%H:%M')
@@ -32,16 +33,17 @@ class CustoService:
 
         for visita in chamado.get('visitas', []):
             custo_visita_materiais = 0.0
-            for material in visita.get('materiais_utilizados', []):
-                qnt, val = material.get('quantidade', 0), material.get('valor', 0)
-                subtotal_mat = round(qnt * val, 2)
-                custo_visita_materiais += subtotal_mat
+            for servico in visita.get('servicos_realizados', []):
+                for material in servico.get('materiais_utilizados', []):
+                    qnt, val = material.get('quantidade', 0), material.get('valor', 0)
+                    subtotal_mat = round(qnt * val, 2)
+                    custo_visita_materiais += subtotal_mat
 
-                nome_mat = material.get('nome', 'Desconhecido')
-                if nome_mat not in materiais_compilado:
-                    materiais_compilado[nome_mat] = {'qnt': 0, 'val_unit': val, 'total': 0.0}
-                materiais_compilado[nome_mat]['qnt'] += qnt
-                materiais_compilado[nome_mat]['total'] += subtotal_mat
+                    nome_mat = material.get('nome', 'Desconhecido')
+                    if nome_mat not in materiais_compilado:
+                        materiais_compilado[nome_mat] = {'qnt': 0, 'val_unit': val, 'total': 0.0}
+                    materiais_compilado[nome_mat]['qnt'] += qnt
+                    materiais_compilado[nome_mat]['total'] += subtotal_mat
 
             custo_visita_materiais = round(custo_visita_materiais, 2)
 

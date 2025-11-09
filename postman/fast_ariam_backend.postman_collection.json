@@ -14,14 +14,7 @@
 					"name": "Novo Técnico",
 					"request": {
 						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{token_tecnico_2}}",
-									"type": "string"
-								}
-							]
+							"type": "noauth"
 						},
 						"method": "POST",
 						"header": [],
@@ -289,7 +282,7 @@
 									"bearer": [
 										{
 											"key": "token",
-											"value": "{{token_tecnico_3}}",
+											"value": "{{token_tecnico_1}}",
 											"type": "string"
 										}
 									]
@@ -298,7 +291,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"data_visita\": \"2025-11-05\",\r\n    \"hora_inicio_deslocamento\": \"14:00\",\r\n    \"hora_chegada_cliente\": \"14:30\",\r\n    \"hora_inicio_atendimento\": \"14:35\",\r\n    \"hora_fim_atendimento\": \"16:00\",\r\n    \"km_total\": 20,\r\n    \"descricao_servico_executado\": \"Problema de refrigeração e estrutura.\",\r\n    \"servico_finalizado\": false,\r\n    \"pendencia\": \"Aguardando nova peça de estrutura.\",\r\n    \"materiais_utilizados\": [\r\n        {\r\n            \"nome\": \"Solda Prata\",\r\n            \"quantidade\": 1,\r\n            \"valor\": 15.50\r\n        },\r\n        {\r\n            \"nome\": \"Tubo de Cobre 1/4\",\r\n            \"quantidade\": 1,\r\n            \"valor\": 25.00\r\n        }\r\n    ],\r\n    \"defeitos_principais\": [\r\n        \"Refrigeração\",\r\n        \"Estrutura\"\r\n    ],\r\n    \"sub_defeitos_refrigeracao\": [\r\n        \"Vazamento\"\r\n    ],\r\n    \"sub_defeitos_vazamento\": [\r\n        \"Nº Ponto\"\r\n    ],\r\n    \"vazamento_ponto_descricao\": \"Vazamento encontrado na união do Ponto 3 da solda.\",\r\n    \"sub_defeitos_estrutura\": [\r\n        \"07 - Porta Parachoque\"\r\n    ]\r\n}",
+									"raw": "{\r\n    \"data_visita\": \"2025-11-06\",\r\n    \"hora_inicio_deslocamento\": \"08:00\",\r\n    \"hora_chegada_cliente\": \"08:45\",\r\n    \"hora_inicio_atendimento\": \"09:00\",\r\n    \"hora_fim_atendimento\": \"11:00\",\r\n    \"km_total\": 30,\r\n    \"valor_pedagio\": 5.00,\r\n    \"valor_frete_devolucao\": 0,\r\n    \"descricao_servico_executado\": \"Visita para manutenção em dois equipamentos.\",\r\n    \"servico_finalizado\": false,\r\n    \"pendencia\": \"Aguardando peça para o segundo equipamento.\",\r\n\r\n    \"servicos_realizados\": [\r\n        {\r\n            \"numero_serie_atendido\": \"SN-FREEZER-A\",\r\n            \"defeitos_principais\": [\"Refrigeração\"],\r\n            \"sub_defeitos_refrigeracao\": [\"Vazamento\"],\r\n            \"vazamento_ponto_descricao\": \"Solda refeita no ponto X.\",\r\n            \"materiais_utilizados\": [\r\n                {\"nome\": \"Solda\", \"quantidade\": 1, \"valor\": 10.0}\r\n            ]\r\n        },\r\n        {\r\n            \"numero_serie_atendido\": \"SN-GELADEIRA-B\",\r\n            \"defeitos_principais\": [\"Iluminação\", \"Estrutura\"],\r\n            \"sub_defeitos_iluminacao\": [\"Lâmpada Queimada\"],\r\n            \"sub_defeitos_estrutura\": [\"06 - Puxador\"],\r\n            \"materiais_utilizados\": [\r\n                {\"nome\": \"Lâmpada LED\", \"quantidade\": 2, \"valor\": 25.0},\r\n                {\"nome\": \"Puxador Novo\", \"quantidade\": 1, \"valor\": 45.0}\r\n            ]\r\n        }\r\n    ]\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -370,6 +363,198 @@
 							"response": []
 						},
 						{
+							"name": "Upload de Foto (odometro_fim)",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token_tecnico_3}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "file_type",
+											"value": "odometro_fim_url",
+											"type": "text"
+										},
+										{
+											"key": "file",
+											"type": "file",
+											"src": "/F:/Users/matas/Downloads/559427052_810080785283927_4503344171606614803_n.jpg"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}:{{port}}/api/chamados/1/visitas/1/upload_file",
+									"host": [
+										"{{base_url}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"chamados",
+										"1",
+										"visitas",
+										"1",
+										"upload_file"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Upload de Foto (assinatura)",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token_tecnico_3}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "file_type",
+											"value": "assinatura_cliente_url",
+											"type": "text"
+										},
+										{
+											"key": "file",
+											"type": "file",
+											"src": "/F:/Users/matas/Downloads/feixiao_go_do_a_crime.png"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}:{{port}}/api/chamados/1/visitas/1/upload_file",
+									"host": [
+										"{{base_url}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"chamados",
+										"1",
+										"visitas",
+										"1",
+										"upload_file"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Upload de Foto (pedágio)",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token_tecnico_3}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "file_type",
+											"value": "comprovante_pedagio_urls",
+											"type": "text"
+										},
+										{
+											"key": "file",
+											"type": "file",
+											"src": "/F:/Users/matas/Downloads/465213973_1737017980470379_2419824524378363942_n.jpg"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}:{{port}}/api/chamados/1/visitas/1/upload_file",
+									"host": [
+										"{{base_url}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"chamados",
+										"1",
+										"visitas",
+										"1",
+										"upload_file"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Upload de Foto (frete)",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token_tecnico_3}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "file_type",
+											"value": "comprovante_frete_urls",
+											"type": "text"
+										},
+										{
+											"key": "file",
+											"type": "file",
+											"src": "/F:/Users/matas/Downloads/468612937_4728880707336525_1206159384004925741_n.jpg"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}:{{port}}/api/chamados/1/visitas/1/upload_file",
+									"host": [
+										"{{base_url}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"chamados",
+										"1",
+										"visitas",
+										"1",
+										"upload_file"
+									]
+								}
+							},
+							"response": []
+						},
+						{
 							"name": "Atualizar Visita",
 							"request": {
 								"auth": {
@@ -405,6 +590,47 @@
 										"3",
 										"visitas",
 										"2"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Finalizar Chamado",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token_tecnico_1}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\"servico_finalizado\": true}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}:{{port}}/api/chamados/1/visitas/1",
+									"host": [
+										"{{base_url}}"
+									],
+									"port": "{{port}}",
+									"path": [
+										"api",
+										"chamados",
+										"1",
+										"visitas",
+										"1"
 									]
 								}
 							},
@@ -469,7 +695,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "{{token_tecnico_2}}",
+									"value": "{{token_tecnico_3}}",
 									"type": "string"
 								}
 							]
@@ -743,7 +969,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "{{token_tecnico_2}}",
+									"value": "{{token_tecnico_3}}",
 									"type": "string"
 								}
 							]
@@ -949,12 +1175,12 @@
 							"urlencoded": [
 								{
 									"key": "username",
-									"value": "eletropaulorefrigeracao@gmail.com",
+									"value": "tecnico1@email.com",
 									"type": "text"
 								},
 								{
 									"key": "password",
-									"value": "senha123",
+									"value": "senha1",
 									"type": "text"
 								}
 							]
@@ -994,12 +1220,12 @@
 							"urlencoded": [
 								{
 									"key": "username",
-									"value": "comercio.mariahelena@outlook.com",
+									"value": "tecnico2@email.com",
 									"type": "text"
 								},
 								{
 									"key": "password",
-									"value": "outraSenhaBemSegura456",
+									"value": "senha2",
 									"type": "text"
 								}
 							]
@@ -1039,12 +1265,12 @@
 							"urlencoded": [
 								{
 									"key": "username",
-									"value": "joaodaconstrucao@hotmail.com",
+									"value": "admin@email.com",
 									"type": "text"
 								},
 								{
 									"key": "password",
-									"value": "senhaFortissimaXYZ789",
+									"value": "senha3",
 									"type": "text"
 								}
 							]
@@ -1112,11 +1338,11 @@
 	"variable": [
 		{
 			"key": "base_url",
-			"value": ""
+			"value": "127.0.0.1"
 		},
 		{
 			"key": "port",
-			"value": ""
+			"value": "8000"
 		},
 		{
 			"key": "token_tecnico_1",

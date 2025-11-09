@@ -1,10 +1,13 @@
-from pydantic import BaseModel
+from typing import List, Optional
+from pydantic import BaseModel, Field
 from enum import Enum
+
 
 class Material(BaseModel):
     nome: str
     quantidade: int
     valor: float
+
 
 class TipoDefeitoPrincipal(str, Enum):
     """Categorias principais de defeito"""
@@ -13,11 +16,13 @@ class TipoDefeitoPrincipal(str, Enum):
     ESTRUTURA = "Estrutura"
     OUTROS = "Outros"
 
+
 class SubDefeitoRefrigeracao(str, Enum):
     """Sub-categorias para defeitos de Refrigeração"""
     COMPRESSOR = "Compressor"
     VAZAMENTO = "Vazamento"
     OUTROS = "Outros (Refrigeração)"
+
 
 class SubDefeitoCompressor(str, Enum):
     """Sub-categorias para defeitos de Compressão"""
@@ -32,10 +37,12 @@ class SubDefeitoCompressor(str, Enum):
     NAO_SUCCIONA = "Não Succiona"
     DESARMADO = "Desarmado"
 
+
 class SubDefeitoVazamento(str, Enum):
     """Sub-categorias para defeitos de Vazamento"""
     N_PONTO = "Nº Ponto"
     NAO_LOCALIZADO = "Não Localizado"
+
 
 class SubDefeitoOutros(str, Enum):
     """Sub-categorias para Outros defeitos"""
@@ -46,11 +53,13 @@ class SubDefeitoOutros(str, Enum):
     CONTROLADOR_QUEIMADO = "Controlador Queimado"
     REGULAGEM_PARAMETROS = "Regulagem Parâmetros"
 
+
 class SubDefeitoIluminacao(str, Enum):
     """Sub-categorias para defeitos de Iluminação"""
     LAMPADA_QUEIMADA = "Lâmpada Queimada"
     SEM_ALIMENTACAO = "Sem Alimentação"
     EM_CURTO = "Em Curto"
+
 
 class SubDefeitoEstrutura(str, Enum):
     """Sub-categorias para defeitos de Estrutura"""
@@ -66,3 +75,36 @@ class SubDefeitoEstrutura(str, Enum):
     PERFIL_FRONTAL = "10 - Perfil Frontal"
     PARACHOQUE_FRONTAL = "11 - Parachoque Frontal"
     PARACHOQUE_LATERAL = "12 - Parachoque Lateral"
+
+
+# noinspection PyArgumentList
+class ServicoEquipamento(BaseModel):
+    """
+    Representa um trabalho realizado em um único equipamento durante uma visita.
+    """
+    numero_serie_atendido: str = Field(..., description="Numero de série do equipamento atendido.")
+    defeitos_principais: List[TipoDefeitoPrincipal] = Field(default=[],
+                                                            description="Lista de categorias principais do defeito.")
+    defeito_outros_descricao: Optional[str] = Field(None,
+                                                    description="Descrição se 'Outros' for selecionado em defeitos_principais")
+    sub_defeitos_refrigeracao: List[SubDefeitoRefrigeracao] = Field(default=[],
+                                                                    description="Sub-defeitos de Refrigeração")
+    sub_defeitos_compressor: List[SubDefeitoCompressor] = Field(default=[],
+                                                                description="Detalhes do defeito de Compressor")
+    sub_defeitos_vazamento: List[SubDefeitoVazamento] = Field(default=[],
+                                                              description="Detalhes do defeito de Vazamento")
+    vazamento_ponto_descricao: Optional[str] = Field(None,
+                                                     description="Descrição por extenso dos pontos de vazamento")
+    sub_defeitos_outros: List[SubDefeitoOutros] = Field(default=[],
+                                                        description="Detalhes de 'Outros' em Refrigeração")
+    sub_defeitos_iluminacao: List[SubDefeitoIluminacao] = Field(default=[],
+                                                                description="Detalhes do defeito de Iluminação")
+    sub_defeitos_estrutura: List[SubDefeitoEstrutura] = Field(default=[],
+                                                              description="Detalhes do defeito de Estrutura")
+
+    materiais_utilizados: List[Material] = Field(
+        example=[
+            {"nome": "Filtro Secador XYZ", "quantidade": 1, "valor": 85.00},
+            {"nome": "Gás R-134a", "quantidade": 2, "valor": 50.00}
+        ]
+    )

@@ -9,7 +9,6 @@ StatusChamado = Literal["Aberto", "Agendado", "Em Atendimento", "Pendente", "Fin
 class ChamadoBase(BaseModel):
     cliente_id: int = Field(..., gt=0, description="ID do cliente associado ao chamado") # TODO: Lembrar de continuar a validação
     descricao_cliente: str
-    numero_serie_equipamento: Optional[str] = None
     id_tecnico_atribuido: Optional[int] = None
     data_agendamento: Optional[date] = None
     pedido: Optional[str] = None
@@ -38,7 +37,6 @@ class Chamado(ChamadoBase):
 class ChamadoUpdate(BaseModel):
     cliente_id: Optional[int] = Field(None, gt=0, description="Novo ID do cliente para reassociar o chamado")
     descricao_cliente: Optional[str] = None
-    numero_serie_equipamento: Optional[str] = None
     id_tecnico_atribuido: Optional[int] = None
     data_agendamento: Optional[date] = None
     status: Optional[StatusChamado] = None

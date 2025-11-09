@@ -1,6 +1,7 @@
 from pydantic import BaseModel, EmailStr, Field
 from typing import Optional, Literal
 
+# TODO: Dados como CPF, Inscrição Estadual, CNPJ, Senha, Email, Telefone etc. Não apresentam validação no momento.
 
 class DadosBancarios(BaseModel):
     banco: str
@@ -16,6 +17,7 @@ class TecnicoBase(BaseModel):
     cnpj: str
     inscricao_estadual: str
     nome: str
+    cpf: str
     telefone: str
     email: EmailStr
     dados_bancarios: DadosBancarios
@@ -41,6 +43,7 @@ class DadosBancariosUpdate(BaseModel):
 
 class TecnicoUpdate(BaseModel):
     cnpj: Optional[str] = None
+    cpf: Optional[str] = None
     inscricao_estadual: Optional[str] = None
     nome: Optional[str] = None
     telefone: Optional[str] = None
