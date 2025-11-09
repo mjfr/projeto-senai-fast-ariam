@@ -105,7 +105,7 @@ class CustoService:
         ]
 
         return CustoTotalResponse(
-            chamado_id=chamado.get('id', 0),
+            id_os=chamado.get('id', 0),
             custo_total_materiais=round(custo_total_materiais, 2),
             custo_total_km=round(custo_total_km, 2),
             custo_total_pedagio=round(custo_total_pedagio, 2),

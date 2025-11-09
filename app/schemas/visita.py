@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, model_validator, field_validator
 from datetime import date
 from typing import List, Optional
 from .base_schemas import ServicoEquipamento
@@ -50,11 +50,12 @@ class Visita(VisitaBase):
     """
     Schema de saída de uma visita.
     """
-    id: int
+    id_visita: int
     odometro_inicio_url: Optional[str] = Field(None, description="URL da foto do odômetro no início do deslocamento.")
     odometro_fim_url: Optional[str] = Field(None, description="URL da foto do odômetro no fim do deslocamento.")
-    comprovante_pedagio_urls: List[str] = Field(default=[], description="Lista de URLs dos comprovantes de pedágio.")
-    comprovante_frete_urls: List[str] = Field(default=[],
+    comprovante_pedagio_urls: List[str] = Field(default_factory=list,
+                                                description="Lista de URLs dos comprovantes de pedágio.")
+    comprovante_frete_urls: List[str] = Field(default_factory=list,
                                               description="Lista de URLs dos comprovantes de frete para devolução de peças.")
     assinatura_cliente_url: Optional[str] = Field(None, description="URL da imagem da assinatura digital do cliente.")
 
@@ -89,3 +90,12 @@ class VisitaUpdate(BaseModel):
     comprovante_pedagio_urls: Optional[List[str]] = None
     comprovante_frete_urls: Optional[List[str]] = None
     assinatura_cliente_url: Optional[str] = None
+
+
+    @field_validator('comprovante_pedagio_urls', 'comprovante_frete_urls', mode='before')
+    @classmethod
+    def convert_none_to_empty_list(cls, v):
+        """Se o valor vindo do DB for None, converte para lista vazia."""
+        if v is None:
+            return []
+        return v
