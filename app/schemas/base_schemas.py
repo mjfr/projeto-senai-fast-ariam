@@ -4,13 +4,20 @@ from enum import Enum
 
 
 class Material(BaseModel):
+    """A estrutura para a declaração do uso de um material no chamado."""
     nome: str
     quantidade: int
     valor: float
 
 
+class UserRole(str, Enum):
+    """Define os papéis de usuário permitidos no sistema."""
+    ADMIN = "admin"
+    TECNICO = "tecnico"
+
+
 class TipoDefeitoPrincipal(str, Enum):
-    """Categorias principais de defeito"""
+    """Categorias principais de defeito."""
     REFRIGERACAO = "Refrigeração"
     ILUMINACAO = "Iluminação"
     ESTRUTURA = "Estrutura"
@@ -18,14 +25,14 @@ class TipoDefeitoPrincipal(str, Enum):
 
 
 class SubDefeitoRefrigeracao(str, Enum):
-    """Sub-categorias para defeitos de Refrigeração"""
+    """Sub-categorias para defeitos de Refrigeração."""
     COMPRESSOR = "Compressor"
     VAZAMENTO = "Vazamento"
     OUTROS = "Outros (Refrigeração)"
 
 
 class SubDefeitoCompressor(str, Enum):
-    """Sub-categorias para defeitos de Compressão"""
+    """Sub-categorias para defeitos de Compressão."""
     QUEIMADO = "Queimado"
     EM_MASSA = "Em Massa"
     EM_CURTO = "Em Curto"
@@ -39,13 +46,13 @@ class SubDefeitoCompressor(str, Enum):
 
 
 class SubDefeitoVazamento(str, Enum):
-    """Sub-categorias para defeitos de Vazamento"""
+    """Sub-categorias para defeitos de Vazamento."""
     N_PONTO = "Nº Ponto"
     NAO_LOCALIZADO = "Não Localizado"
 
 
 class SubDefeitoOutros(str, Enum):
-    """Sub-categorias para Outros defeitos"""
+    """Sub-categorias para Outros defeitos."""
     FILTRO_ENTUPIDO = "Filtro Entupido"
     CAPILAR_OBSTRUIDO = "Capilar Obstruído"
     MICROMOTOR_QUEIMADO = "Micromotor Queimado"
@@ -55,14 +62,14 @@ class SubDefeitoOutros(str, Enum):
 
 
 class SubDefeitoIluminacao(str, Enum):
-    """Sub-categorias para defeitos de Iluminação"""
+    """Sub-categorias para defeitos de Iluminação."""
     LAMPADA_QUEIMADA = "Lâmpada Queimada"
     SEM_ALIMENTACAO = "Sem Alimentação"
     EM_CURTO = "Em Curto"
 
 
 class SubDefeitoEstrutura(str, Enum):
-    """Sub-categorias para defeitos de Estrutura"""
+    """Sub-categorias para defeitos de Estrutura."""
     PERFIL_CURVO_VIDRO = "01 - Perfil Curvo Vidro"
     PERFIL_SUPORTE_ILUMINACAO = "02 - Perfil Suporte Iluminação"
     LENTE_CALHA_ILUMINACAO = "03 - Lente Calha Iluminação"
@@ -79,9 +86,7 @@ class SubDefeitoEstrutura(str, Enum):
 
 # noinspection PyArgumentList
 class ServicoEquipamento(BaseModel):
-    """
-    Representa um trabalho realizado em um único equipamento durante uma visita.
-    """
+    """Representa um trabalho realizado em um único equipamento durante uma visita."""
     numero_serie_atendido: str = Field(..., description="Numero de série do equipamento atendido.")
     defeitos_principais: List[TipoDefeitoPrincipal] = Field(default=[],
                                                             description="Lista de categorias principais do defeito.")

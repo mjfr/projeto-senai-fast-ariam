@@ -1,5 +1,6 @@
 from pydantic import BaseModel, EmailStr, Field
 from typing import Optional, Literal
+from .base_schemas import UserRole
 
 # TODO: Dados como CPF, Inscrição Estadual, CNPJ, Senha, Email, Telefone etc. Não apresentam validação no momento.
 
@@ -10,19 +11,20 @@ class DadosBancarios(BaseModel):
     pix: Optional[str] = None
 
 
-UserRole = Literal["admin", "tecnico"]
+# UserRole = Literal["admin", "tecnico"]
 
 
 class TecnicoBase(BaseModel):
     cnpj: str
-    inscricao_estadual: str
+    inscricao_estadual: Optional[str] = None
     nome: str
     cpf: str
     telefone: str
     email: EmailStr
     dados_bancarios: DadosBancarios
     is_active: bool = True
-    role: UserRole = Field("tecnico", description="Papel do usuário no sistema.")
+    # role: UserRole = Field("tecnico", description="Papel do usuário no sistema.")
+    role: UserRole = UserRole.TECNICO
 
 
 class TecnicoCreate(TecnicoBase):
@@ -30,7 +32,8 @@ class TecnicoCreate(TecnicoBase):
 
 
 class Tecnico(TecnicoBase):
-    id: int
+    # id: int
+    id_tecnico: int
 
     class Config:
         from_attributes = True
