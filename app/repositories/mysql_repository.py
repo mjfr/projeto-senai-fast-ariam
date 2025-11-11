@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from typing import List, Optional, Dict, Any
 from datetime import date
@@ -7,6 +8,7 @@ from app.models.chamado import OrdemServico
 from app.models.visita import Visita
 from app.models.servico_equipamento import ServicoEquipamento
 from app.models.material import Material
+from app.schemas.base_schemas import StatusChamado
 from app.schemas.tecnico import TecnicoCreate, TecnicoUpdate
 from app.schemas.cliente import ClienteCreate, ClienteUpdate
 from app.schemas.chamado import ChamadoCreate, ChamadoUpdate
@@ -186,3 +188,72 @@ class SQLRepository:
             return None
         self.db.commit()
         return self.get_visita_by_id(visita_id)
+
+    def update_visita_e_chamado(
+            self,
+            visita_id: int,
+            chamado_id: int,
+            visita_in: VisitaUpdate
+    ) -> Optional[Visita]:
+        """
+        Atualiza uma visita e, se necessário, o status do chamado pai, validando as regras de negócio para finalização.
+        Tudo em uma única transação.
+        """
+        try:
+            visita_db = self.get_visita_by_id(visita_id)
+            if not visita_db or visita_db.id_os != chamado_id:
+                return None
+
+            update_data = visita_in.dict(exclude_unset=True)
+            if not update_data:
+                return visita_db
+
+            for key, value in update_data.items():
+                if hasattr(visita_db, key):
+                    if key in ('comprovante_pedagio_urls', 'comprovante_frete_urls', 'servicos_realizados'):
+                        setattr(visita_db, key, value)
+                    else:
+                        setattr(visita_db, key, value)
+            dados_update_chamado = {}
+            if visita_db.servico_finalizado is True:
+                if not visita_db.assinatura_cliente_url:
+                    raise HTTPException(status_code=400,
+                                        detail="Assinatura do cliente é obrigatória para finalizar a visita.")
+                if visita_db.km_total > 0:
+                    if not visita_db.odometro_inicio_url or not visita_db.odometro_fim_url:
+                        raise HTTPException(status_code=400,
+                                            detail="Fotos do odômetro (início e fim) são obrigatórias se km_total > 0.")
+                if visita_db.valor_pedagio > 0:
+                    if not visita_db.comprovante_pedagio_urls:
+                        raise HTTPException(status_code=400,
+                                            detail="Comprovante(s) de pedágio são obrigatórios se valor_pedagio > 0.")
+                if visita_db.valor_frete_devolucao > 0:
+                    if not visita_db.comprovante_frete_urls:
+                        raise HTTPException(status_code=400,
+                                            detail="Comprovante(s) de frete são obrigatórios se valor_frete_devolucao > 0.")
+
+                dados_update_chamado = {"status": StatusChamado.FINALIZADO.value, "data_conclusao": date.today()}
+
+            elif visita_db.servico_finalizado is False:
+                pendencia = visita_db.pendencia
+                dados_update_chamado = {
+                    "status": StatusChamado.PENDENTE.value if pendencia else StatusChamado.EM_ATENDIMENTO.value,
+                    "data_conclusao": None
+                }
+
+            self.db.add(visita_db)
+
+            if dados_update_chamado:
+                self.db.query(OrdemServico).filter(OrdemServico.id_os == chamado_id).update(dados_update_chamado)
+
+            self.db.commit()
+
+        except HTTPException as e:
+            self.db.rollback()
+            raise e
+        except Exception as e:
+            self.db.rollback()
+            raise e
+
+        self.db.refresh(visita_db)
+        return visita_db
