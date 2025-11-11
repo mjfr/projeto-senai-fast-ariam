@@ -3,7 +3,7 @@ from typing import List, Optional
 from sqlalchemy.orm import Session
 from app.schemas.cliente import Cliente, ClienteCreate, ClienteUpdate
 from app.repositories.mysql_repository import SQLRepository
-from app.core.security import require_admin_role
+from app.core.security import require_admin_role, get_current_active_user
 from app.db.database import get_db
 
 router = APIRouter()
@@ -39,7 +39,7 @@ def get_todos_clientes(
 def get_cliente_por_id(
         cliente_id: int,
         repo: SQLRepository = Depends(get_cliente_repository),
-        admin_user: dict = Depends(require_admin_role)
+        current_user: dict = Depends(get_current_active_user)
 ):
     cliente_encontrado = repo.get_cliente_by_id(cliente_id)
     if not cliente_encontrado:
