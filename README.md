@@ -21,11 +21,19 @@ API desenvolvida em FastAPI para o sistema de gerenciamento de Ordens de Serviç
     ```bash
     pip install -r requirements.txt
     ```
-
-4.  **Execute o servidor:**
+    
+4.  **Crie o arquivo ```.env``` na raiz e preencha a partir do exemplo ```.env.example```.**
+<br><br>
+5.  **Crie o banco de dados a partir do arquivo `fast_db.sql` dentro da pasta `mysql`.**
+<br><br>
+6.  **Execute o servidor:**
     ```bash
     uvicorn app.main:app --reload
     ```
+
+## OBS.:
+No dado momento, o usuário administrador é criado a partir da modificação do código (removendo `_admin_user: dict = Depends(require_admin_role)` do
+    endpoint `create_chamado` dentro de `/app/api/endpoints/chamados.py`) ou realizando manualmente o insert no banco de dados.
 
 ## Acesso à API
 
